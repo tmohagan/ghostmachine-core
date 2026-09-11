@@ -1,29 +1,46 @@
+import os
 import httpx
-import logging
-from pydantic import BaseModel
+from typing import Dict, Any
 
-logger = logging.getLogger(__name__)
+class GitHubClient:
+    """
+    Manages TCP socket connections to the GitHub REST API.
+    Maintains an asynchronous connection pool to reuse TLS sessions.
+    """
+    def __init__(self, repo: str):
+        self.token = os.environ.get("GITHUB_TOKEN")
+        if not self.token:
+            raise ValueError("GITHUB_TOKEN environment variable is missing.")
+            
+        self.repo = repo
+        self.client = httpx.AsyncClient(
+            base_url=f"https://api.github.com/repos/{self.repo}",
+            headers={
+                "Authorization": f"Bearer {self.token}",
+                "Accept": "application/vnd.github.v3+json",
+                "X-GitHub-Api-Version": "2022-11-28"
+            },
+            timeout=10.0
+        )
 
-class PRResult(BaseModel):
-    pr_url: str
-    status: str
+    async def create_pull_request(self, title: str, head_branch: str, base_branch: str, body: str) -> Dict[str, Any]:
+        """
+        Serializes a JSON payload and transmits it over the TCP socket to 
+        the GitHub REST API to propose a branch merge.
+        """
+        payload = {
+            "title": title,
+            "head": head_branch,
+            "base": base_branch,
+            "body": body
+        }
+        
+        response = await self.client.post("/pulls", json=payload)
+        response.raise_for_status()
+        return response.json()
 
-async def create_pull_request(repo: str, branch: str, title: str, body: str, diff: str, token: str) -> PRResult:
-    """Transmits TCP payloads to GitHub REST API to stage a Pull Request."""
-    logger.info(f"Opening encrypted TCP socket to GitHub API for {repo}...")
-    
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github.v3+json"
-    }
-    
-    # Note: Structural baseline for API client. Full Git tree operations will be mapped here.
-    async with httpx.AsyncClient() as client:
-        try:
-            print(f"STAGING PR: {title} on {repo}")
-            return PRResult(
-                pr_url=f"https://github.com/{repo}/pull/mock-id",
-                status="staged"
-            )
-        except Exception as e:
-            return PRResult(pr_url="", status=f"failed: {str(e)}")
+    async def close(self):
+        """
+        Explicitly close the TCP sockets and release the file descriptors.
+        """
+        await self.client.aclose()
