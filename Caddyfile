@@ -1,0 +1,9 @@
+tim-ohagan.local {
+    tls internal
+    reverse_proxy cms-app:8000
+}
+
+ghostmachine.local {
+    tls internal
+    reverse_proxy control-plane:8000
+}
