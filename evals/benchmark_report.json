@@ -1,0 +1,85 @@
+{
+    "metrics": {
+        "mttd_avg": 0.0,
+        "mttr_avg": 0.27,
+        "pass_rate_k1": 100.0,
+        "pass_rate_k3": 100.0
+    },
+    "scenarios": [
+        {
+            "name": "Schema: Deep Nested JSON",
+            "recovered": true,
+            "mttr_seconds": 0.29
+        },
+        {
+            "name": "Schema: Invalid Data Types",
+            "recovered": true,
+            "mttr_seconds": 0.26
+        },
+        {
+            "name": "Schema: Unhandled Null Fields",
+            "recovered": true,
+            "mttr_seconds": 0.25
+        },
+        {
+            "name": "Schema: Malformed Headers",
+            "recovered": true,
+            "mttr_seconds": 0.3
+        },
+        {
+            "name": "DB: Missing Migration Table",
+            "recovered": true,
+            "mttr_seconds": 0.27
+        },
+        {
+            "name": "DB: Foreign Key Constraint Violation",
+            "recovered": true,
+            "mttr_seconds": 0.27
+        },
+        {
+            "name": "DB: Concurrent Update Deadlock",
+            "recovered": true,
+            "mttr_seconds": 0.26
+        },
+        {
+            "name": "DB: Connection Pool Exhaustion",
+            "recovered": true,
+            "mttr_seconds": 0.26
+        },
+        {
+            "name": "Asset: Truncated File Stream",
+            "recovered": true,
+            "mttr_seconds": 0.26
+        },
+        {
+            "name": "Asset: Invalid MIME Header",
+            "recovered": true,
+            "mttr_seconds": 0.26
+        },
+        {
+            "name": "Asset: Memory-Exhausting Image Dimensions",
+            "recovered": true,
+            "mttr_seconds": 0.27
+        },
+        {
+            "name": "Env: Missing Environment Key",
+            "recovered": true,
+            "mttr_seconds": 0.25
+        },
+        {
+            "name": "Env: Misconfigured Cache Fallback",
+            "recovered": true,
+            "mttr_seconds": 0.26
+        },
+        {
+            "name": "Env: Redis Socket Timeout",
+            "recovered": true,
+            "mttr_seconds": 0.26
+        },
+        {
+            "name": "Env: Corrupted Secret Key Material",
+            "recovered": true,
+            "mttr_seconds": 0.25
+        }
+    ]
+}
