@@ -2,7 +2,7 @@ import os
 from google import genai
 from orchestrator.state import IncidentState
 
-client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY", ""))
+client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
 def repro_synthesis_node(state: IncidentState) -> dict:
     trace_id = state["trace_id"]
@@ -14,7 +14,6 @@ Target endpoint base URL is http://cms-app:8000.
 Exception: {state['exception_class']}
 Stack Trace:
 {chr(10).join(state['stack_frames'])}
-
 Requirements:
 - Output ONLY valid Python code. Do not wrap in markdown tags or backticks.
 - Import pytest and httpx.
