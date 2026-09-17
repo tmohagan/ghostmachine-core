@@ -1,21 +1,35 @@
-from typing import Dict, Any
+import os
+from google import genai
 from orchestrator.state import IncidentState
-import logging
 
-logger = logging.getLogger(__name__)
+client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY", ""))
 
-def patch_generation_node(state: IncidentState) -> Dict[str, Any]:
-    """
-    Physical Mechanism: Reads the exception and stack trace from heap memory,
-    generates a unified text diff (the patch) bounded by the 80-line limit, 
-    and writes the string to the shared state.
-    """
-    trace_id = state.get("trace_id", "UNKNOWN_TRACE")
-    logger.info(f"Drafting in-memory patch for trace {trace_id}...")
+def patch_generation_node(state: IncidentState) -> dict:
+    trace_id = state["trace_id"]
+    recursion_count = state.get("recursion_count", 0)
     
-    # Mechanism: We allocate a simulated unified diff string.
-    # In the live graph, the LLM generates this strictly bounded to max_diff_lines (80).
-    simulated_patch = "--- a/app/api/routes/posts.py\n+++ b/app/api/routes/posts.py\n@@ -10,3 +10,3 @@\n-    pass\n+    return {'status': 'fixed'}\n"
+    prompt = f"""You are an autonomous SRE patch engineer.
+Generate a minimal unified git diff (patch) to fix the following software defect.
+
+Error: {state['exception_class']}
+
+Traceback:
+{chr(10).join(state['stack_frames'])}
+
+Rules:
+1. Return ONLY the raw unified git diff format. No conversational text or markdown code fences.
+2. The patch MUST NOT exceed 80 lines.
+3. DO NOT include bare except blocks (ExceptHandler:name=None).
+4. Do not alter authentication dependencies or database migrations.
+"""
+    response = client.models.generate_content(
+        model="gemini-2.5-pro",
+        contents=prompt
+    )
     
-    # We return the dictionary update. LangGraph merges this into IncidentState.
-    return {"proposed_patch": simulated_patch}
+    patch = response.text.strip().removeprefix("```diff").removesuffix("```").strip()
+    
+    return {
+        "proposed_patch": patch,
+        "recursion_count": recursion_count + 1
+    }

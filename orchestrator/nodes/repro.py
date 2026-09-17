@@ -1,21 +1,35 @@
-from typing import Dict, Any
+import os
+from google import genai
 from orchestrator.state import IncidentState
-import logging
 
-logger = logging.getLogger(__name__)
+client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY", ""))
 
-def repro_synthesis_node(state: IncidentState) -> Dict[str, Any]:
-    """
-    Physical Mechanism: Reads the exception details from heap memory,
-    synthesizes a pytest script to trigger the exact failure, and writes
-    the intended file path to the shared state.
-    """
-    trace_id = state.get("trace_id", "UNKNOWN_TRACE")
-    logger.info(f"Synthesizing reproduction test for trace {trace_id}...")
-    
-    # Mechanism: We allocate the target file path for the test.
-    # In the live graph, the FastMCP tool writes the actual code to the target repo's disk.
+def repro_synthesis_node(state: IncidentState) -> dict:
+    trace_id = state["trace_id"]
     test_path = f"tests/incidents/test_reproduce_{trace_id}.py"
     
-    # We return the dictionary update. LangGraph merges this into the main IncidentState.
+    prompt = f"""You are an automated SRE test engineering system.
+Generate a self-contained pytest test using httpx to reproduce the following application failure.
+Target endpoint base URL is http://cms-app:8000.
+Exception: {state['exception_class']}
+Stack Trace:
+{chr(10).join(state['stack_frames'])}
+
+Requirements:
+- Output ONLY valid Python code. Do not wrap in markdown tags or backticks.
+- Import pytest and httpx.
+- The test must send the request payload or trigger the condition that reproduces the error.
+- Function name must be test_reproduce_incident().
+"""
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt
+    )
+    
+    code = response.text.strip().removeprefix("```python").removesuffix("```").strip()
+    
+    os.makedirs(os.path.dirname(test_path), exist_ok=True)
+    with open(test_path, "w") as f:
+        f.write(code)
+        
     return {"repro_test_path": test_path}

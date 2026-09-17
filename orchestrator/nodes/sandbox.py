@@ -1,24 +1,47 @@
-from typing import Dict, Any
+import docker
+import os
 from orchestrator.state import IncidentState
-import logging
 
-logger = logging.getLogger(__name__)
+# Connect to the host's Docker daemon via /var/run/docker.sock
+docker_client = docker.from_env()
 
-def sandbox_execution_node(state: IncidentState) -> Dict[str, Any]:
-    """
-    Physical Mechanism: Pipes the reproduction test to an isolated Docker
-    container via /var/run/docker.sock, waits for the kernel to terminate 
-    the process, and reads the integer exit code.
-    """
-    test_path = state.get("repro_test_path", "UNKNOWN_PATH")
-    logger.info(f"Piping {test_path} to ephemeral Docker sandbox...")
+def sandbox_execution_node(state: IncidentState) -> dict:
+    repo_path = os.environ.get("CMS_REPO_PATH", "/home/tim/workspace/tim-ohagan-cms")
+    test_file = state.get("repro_test_path")
     
-    # Mechanism: We simulate the container execution and read the exit code.
-    # In the LaunchCode standard, the Initial run MUST FAIL to prove the bug exists.
-    # Therefore, the exit code must NOT equal 0.
-    simulated_exit_code = 1 
+    volumes = {
+        repo_path: {"bind": "/app", "mode": "rw"}
+    }
     
-    logger.info(f"Sandbox terminated. Exit code: {simulated_exit_code}")
+    # Apply proposed patch inside working tree if available
+    patch_content = state.get("proposed_patch")
+    if patch_content:
+        patch_file_path = os.path.join(repo_path, "current_fix.patch")
+        with open(patch_file_path, "w") as f:
+            f.write(patch_content)
+        
+        # Apply patch via git
+        os.system(f"cd {repo_path} && git apply current_fix.patch")
+        if os.path.exists(patch_file_path):
+            os.remove(patch_file_path)
+
+    cmd = f"poetry run pytest {test_file}"
     
-    # We return the integer back to the shared RAM state for routing logic
-    return {"sandbox_exit_code": simulated_exit_code}
+    try:
+        container = docker_client.containers.run(
+            image="python:3.11-slim",
+            command=f"bash -c 'poetry install --no-root && {cmd}'",
+            volumes=volumes,
+            working_dir="/app",
+            network_disabled=True,
+            mem_limit="2048m",
+            nano_cpus=2000000000,
+            remove=True,
+            detach=False
+        )
+        exit_code = 0
+    except docker.errors.ContainerError as exc:
+        # Physical non-zero exit code trapped from the host OS
+        exit_code = exc.exit_status
+
+    return {"sandbox_exit_code": exit_code}

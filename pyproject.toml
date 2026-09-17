@@ -1,0 +1,22 @@
+[project]
+name = "ghostmachine-core"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Timothy Ohagan",email = "tmohagan@gmail.com"}
+]
+requires-python = "^3.11"
+dependencies = [
+    "google-genai (>=2.24.0,<3.0.0)",
+    "fastapi (>=0.141.1,<0.142.0)",
+    "uvicorn (>=0.53.0,<0.54.0)",
+    "langgraph (>=1.2.11,<2.0.0)",
+    "pydantic (>=2.13.5,<3.0.0)",
+    "docker (>=7.2.0,<8.0.0)",
+    "httpx (>=0.28.1,<0.29.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
