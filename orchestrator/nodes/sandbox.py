@@ -2,7 +2,6 @@ import docker
 import os
 from orchestrator.state import IncidentState
 
-# Connect to the host's Docker daemon via /var/run/docker.sock
 docker_client = docker.from_env()
 
 def sandbox_execution_node(state: IncidentState) -> dict:
@@ -41,7 +40,6 @@ def sandbox_execution_node(state: IncidentState) -> dict:
         )
         exit_code = 0
     except docker.errors.ContainerError as exc:
-        # Physical non-zero exit code trapped from the host OS
         exit_code = exc.exit_status
 
     return {"sandbox_exit_code": exit_code}
