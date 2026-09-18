@@ -11,9 +11,11 @@ def repro_synthesis_node(state: IncidentState) -> dict:
     prompt = f"""You are an automated SRE test engineering system.
 Generate a self-contained pytest test using httpx to reproduce the following application failure.
 Target endpoint base URL is http://cms-app:8000.
+
 Exception: {state['exception_class']}
 Stack Trace:
 {chr(10).join(state['stack_frames'])}
+
 Requirements:
 - Output ONLY valid Python code. Do not wrap in markdown tags or backticks.
 - Import pytest and httpx.

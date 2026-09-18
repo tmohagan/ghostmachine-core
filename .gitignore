@@ -1,2 +1,7 @@
 __pycache__/
-*.pyc
+*.py[cod]
+.env
+.venv/
+audit.log
+evals/benchmark_report.json
+incidents/

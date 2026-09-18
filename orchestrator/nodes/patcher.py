@@ -10,9 +10,11 @@ def patch_generation_node(state: IncidentState) -> dict:
     
     prompt = f"""You are an autonomous SRE patch engineer.
 Generate a minimal unified git diff (patch) to fix the following software defect.
+
 Error: {state['exception_class']}
 Traceback:
 {chr(10).join(state['stack_frames'])}
+
 Rules:
 1. Return ONLY the raw unified git diff format. No conversational text or markdown code fences.
 2. The patch MUST NOT exceed 80 lines.
