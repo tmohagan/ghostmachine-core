@@ -5,3 +5,4 @@ __pycache__/
 audit.log
 evals/benchmark_report.json
 incidents/
+.pytest_cache/
