@@ -2,7 +2,9 @@ import os
 from google import genai
 from orchestrator.state import IncidentState
 
-client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+def get_genai_client():
+    api_key = os.environ.get("GEMINI_API_KEY")
+    return genai.Client(api_key=api_key)
 
 def patch_generation_node(state: IncidentState) -> dict:
     trace_id = state["trace_id"]
@@ -21,10 +23,17 @@ Rules:
 3. DO NOT include bare except blocks (ExceptHandler:name=None).
 4. Do not alter authentication dependencies or database migrations.
 """
-    response = client.models.generate_content(
-        model="gemini-2.5-pro",
-        contents=prompt
-    )
+    client = get_genai_client()
+    try:
+        response = client.models.generate_content(
+            model="gemini-3.8-flash",
+            contents=prompt
+        )
+    except Exception:
+        response = client.models.generate_content(
+            model="gemini-3.1-pro-preview",
+            contents=prompt
+        )
     
     patch = response.text.strip().removeprefix("```diff").removesuffix("```").strip()
     return {

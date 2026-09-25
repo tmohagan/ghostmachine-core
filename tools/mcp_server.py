@@ -2,7 +2,7 @@ from mcp.server.fastmcp import FastMCP
 import logging
 from tools.docker_runner import run_isolated_test
 from tools.ast_auditor import validate_patch_syntax
-from tools.github_client import create_pull_request
+from tools.github_client import GitHubClient
 
 logger = logging.getLogger(__name__)
 
@@ -29,5 +29,11 @@ def audit_syntax(source_code: str) -> list[str]:
 @mcp.tool()
 async def stage_pr(repo: str, branch: str, title: str, body: str, diff: str, token: str) -> dict:
     """Opens a GitHub PR with the validated patch."""
-    result = await create_pull_request(repo, branch, title, body, diff, token)
-    return {"pr_url": result.pr_url, "status": result.status}
+    client = GitHubClient(repo=repo)
+    try:
+        result = await client.create_pull_request(title=title, head_branch=branch, base_branch="main", body=body)
+        return {"pr_url": result.get("html_url"), "status": "created"}
+    except Exception as e:
+        return {"error": str(e), "status": "failed"}
+    finally:
+        await client.close()

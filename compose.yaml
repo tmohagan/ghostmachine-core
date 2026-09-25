@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  control-plane:
+    build: .
+    image: ghostmachine-control-plane:latest
+    container_name: control-plane
+    restart: unless-stopped
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_REPO=${GITHUB_REPO:-tmohagan/tim-ohagan-cms}
+      - CMS_REPO_PATH=${CMS_REPO_PATH:-/opt/ghostmachine/tim-ohagan-cms}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${CMS_REPO_PATH:-/opt/ghostmachine/tim-ohagan-cms}:${CMS_REPO_PATH:-/opt/ghostmachine/tim-ohagan-cms}
+    networks:
+      ghostmachine-bridge:
+        aliases:
+          - ghostmachine.local
+          - control-plane
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2048M
+
+networks:
+  ghostmachine-bridge:
+    external: true
