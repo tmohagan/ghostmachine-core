@@ -49,6 +49,22 @@ class StagingCanaryNode:
         ledger = self.generate_telemetry_ledger(tokens, compute)
         body = f"## Automated SRE Post-Mortem\n\n**Incident:** {incident_id}\n\n{ledger}"
         
+        cms_repo_path = os.environ.get("CMS_REPO_PATH", "/home/tim/workspace/tim-ohagan-cms")
+        try:
+            import subprocess
+            cmd = (
+                f"cd {cms_repo_path} && "
+                f"git config user.name 'GhostMachine SRE' && "
+                f"git config user.email 'bot@ghostmachine.dev' && "
+                f"git checkout -B fix/{incident_id} && "
+                f"git add incidents/ tests/incidents/ 2>/dev/null || true && "
+                f"git commit -m 'fix: Autonomous Remediation for {incident_id}' || true && "
+                f"git push origin fix/{incident_id} --force"
+            )
+            subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=20)
+        except Exception as e:
+            logger.warning(f"Git branch push failed: {e}")
+
         base_branch = os.environ.get("GITHUB_BASE_BRANCH", "main")
         try:
             response = await client.create_pull_request(
