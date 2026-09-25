@@ -5,5 +5,13 @@ tim-ohagan.local {
 
 ghostmachine.local {
     tls internal
-    reverse_proxy control-plane:8000
+    
+    handle /api/* {
+        reverse_proxy control-plane:8000
+    }
+    
+    handle {
+        root * /var/www/html
+        file_server
+    }
 }
