@@ -1,3 +1,4 @@
+import os
 import httpx
 import asyncio
 import sys
@@ -7,7 +8,8 @@ async def trigger_chaos_fault():
     Transmits an HTTP request to the target's chaos playground endpoint 
     to intentionally trigger a 500 CPU fault for SRE evaluation.
     """
-    url = "http://tim-ohagan.local/playground/fault/500"
+    target = os.environ.get("TARGET_URL", "http://tim-ohagan.local").rstrip("/")
+    url = target if "/playground/fault/500" in target else f"{target}/playground/fault/500"
     
     print(f"Triggering chaos fault at {url}...")
     async with httpx.AsyncClient() as client:
