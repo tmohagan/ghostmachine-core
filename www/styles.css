@@ -220,3 +220,18 @@ body {
 .cyber-button:hover::before {
     left: 100%;
 }
+
+@media (max-width: 600px) {
+    .glitch {
+        font-size: 1.8rem;
+    }
+    
+    .container {
+        padding: 20px 10px;
+    }
+    
+    .cyber-button {
+        padding: 10px 20px;
+        font-size: 1rem;
+    }
+}
