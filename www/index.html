@@ -23,12 +23,7 @@
             
             <section class="description">
                 <h2>SYSTEM.STATUS: <span class="online">ONLINE</span></h2>
-                <p>
-                    > INITIALIZING GHOSTMACHINE CORE...<br>
-                    > AUTONOMOUS SRE AGENT ENGAGED.<br>
-                    > FAULT DETECTION ACTIVE.<br>
-                    > AI REMEDIATION PIPELINE READY.<br>
-                </p>
+                <p id="typing-text" class="terminal-text"></p>
                 <p class="summary">
                     GhostMachine is an autonomous Site Reliability Engineering (SRE) system designed to detect, diagnose, and remediate faults in real-time. Utilizing advanced language models, it generates and tests patches before automatically submitting pull requests to ensure system uptime and stability.
                 </p>
@@ -46,5 +41,53 @@
             </nav>
         </main>
     </div>
+    <script>
+        const lines = [
+            "> INITIALIZING GHOSTMACHINE CORE...",
+            "> AUTONOMOUS SRE AGENT ENGAGED.",
+            "> FAULT DETECTION ACTIVE.",
+            "> AI REMEDIATION PIPELINE READY."
+        ];
+        
+        const typingText = document.getElementById("typing-text");
+        let lineIndex = 0;
+        let charIndex = 0;
+        
+        function typeWriter() {
+            if (lineIndex < lines.length) {
+                if (charIndex === 0 && lineIndex > 0) {
+                    typingText.innerHTML += "<br>";
+                }
+                
+                if (charIndex < lines[lineIndex].length) {
+                    typingText.innerHTML += lines[lineIndex].charAt(charIndex);
+                    charIndex++;
+                    setTimeout(typeWriter, 30); // Speed of typing characters
+                } else {
+                    lineIndex++;
+                    charIndex = 0;
+                    setTimeout(typeWriter, 500); // Pause between lines
+                }
+            }
+        }
+        
+        // Add a blinking cursor effect
+        const style = document.createElement('style');
+        style.textContent = `
+            #typing-text::after {
+                content: '█';
+                animation: cursor-blink 1s step-end infinite;
+            }
+            @keyframes cursor-blink {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        window.onload = () => {
+            setTimeout(typeWriter, 500); // Initial delay before typing starts
+        };
+    </script>
 </body>
 </html>
