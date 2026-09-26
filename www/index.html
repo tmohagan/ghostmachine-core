@@ -3,50 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ghostmachine.dev - Autonomous SRE</title>
+    <title>GhostMachine | Autonomous SRE Control Plane</title>
     <meta name="description" content="ghostmachine.dev - Autonomous SRE system with AI-driven remediation.">
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="scanlines"></div>
     <div class="grid-bg"></div>
+
+    <div class="top-nav">
+        <div class="nav-pill active">
+            <span class="indicator green"></span> CONTROL PLANE: GHOSTMACHINE.DEV
+        </div>
+        <a href="http://localhost:8000" class="nav-pill target-link">
+            <span class="indicator red"></span> TARGET SYSTEM: TIM-OHAGAN.COM
+        </a>
+    </div>
+
     <div class="container">
         <header class="glitch-wrapper">
             <h1 class="glitch" data-text="GHOSTMACHINE.DEV">GHOSTMACHINE.DEV</h1>
+            <div class="system-status">SYSTEM.STATUS: <span class="online">ONLINE</span></div>
         </header>
-        
-        <main class="content-panel">
-            <div class="image-container">
-                <img src="ghostmachine_dev.jpg" alt="GhostMachine Dev Logo" class="hologram-img">
-            </div>
-            
-            <section class="description">
-                <h2>SYSTEM.STATUS: <span class="online">ONLINE</span></h2>
-                <p id="typing-text" class="terminal-text"></p>
-                <p class="summary">
-                    GhostMachine is an autonomous Site Reliability Engineering (SRE) system designed to detect, diagnose, and remediate faults in real-time. Utilizing advanced language models, it generates and tests patches before automatically submitting pull requests to ensure system uptime and stability.
-                </p>
-            </section>
 
-            <nav class="links">
-                <a href="https://github.com/tmohagan/ghostmachine-core" target="_blank" class="cyber-button">
-                    <span class="btn-text">ACCESS REPOSITORY</span>
-                    <span class="btn-glitch"></span>
-                </a>
-                <a href="https://www.linkedin.com/in/timothy-ohagan/" target="_blank" class="cyber-button">
-                    <span class="btn-text">CREATOR UPLINK</span>
-                    <span class="btn-glitch"></span>
-                </a>
-            </nav>
-        </main>
+        <section class="dashboard-grid">
+            
+            <!-- Left Column: Pipeline & Summary -->
+            <div class="left-col">
+                <div class="content-panel summary-panel">
+                    <p id="typing-text" class="terminal-text"></p>
+                    <p class="summary">
+                        GhostMachine is an autonomous Site Reliability Engineering (SRE) orchestrator. When the target application crashes, it ingests the OpenTelemetry trace, synthesizes a reproduction test, drafts a patch via LLM, statically analyzes it for security, and ships a verified Pull Request to GitHub in under 90 seconds.
+                    </p>
+                </div>
+
+                <div class="content-panel pipeline-panel">
+                    <h2>LangGraph Remediation Pipeline</h2>
+                    <div class="pipeline-stepper">
+                        <div class="step" data-info="Ingests 5xx webhook, parses OpenTelemetry span, stack frames, and request vector.">
+                            <div class="step-num">1</div>
+                            <div class="step-name">Ingest Span</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step" data-info="Analyzes traceback to generate isolated pytest reproduction test using httpx.">
+                            <div class="step-num">2</div>
+                            <div class="step-name">Repro Test</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step" data-info="Executes test in ephemeral Docker sandbox. Must fail (Exit Code != 0) to validate bug.">
+                            <div class="step-num">3</div>
+                            <div class="step-name">Sandbox (Init)</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step" data-info="LLM drafts patch. Python AST guardrails block unsafe paths and bare exceptions.">
+                            <div class="step-num">4</div>
+                            <div class="step-name">Patch & AST Audit</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step" data-info="Runs Repro + Full Regression test suite on patched sandbox. Must pass (Exit Code 0).">
+                            <div class="step-num">5</div>
+                            <div class="step-name">Regression Test</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step" data-info="Stages canary and automatically submits verified GitHub PR with telemetry ledger.">
+                            <div class="step-num">6</div>
+                            <div class="step-name">GitHub PR</div>
+                        </div>
+                    </div>
+                    <div id="step-details" class="step-details-box">
+                        Hover over a node to inspect pipeline operations.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Telemetry & Actions -->
+            <div class="right-col">
+                <div class="content-panel telemetry-panel">
+                    <h2>Operational Telemetry</h2>
+                    <table class="telemetry-table">
+                        <tbody>
+                            <tr>
+                                <td>Mean Time to Remediate</td>
+                                <td class="highlight">~52s</td>
+                            </tr>
+                            <tr>
+                                <td>Direct Inference Cost</td>
+                                <td>$0.0235</td>
+                            </tr>
+                            <tr>
+                                <td>Sandbox Compute Cost</td>
+                                <td>$0.0028</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td>Auto Remediation Cost</td>
+                                <td class="highlight success">$0.0263</td>
+                            </tr>
+                            <tr class="baseline-row">
+                                <td>Manual Labor Baseline</td>
+                                <td class="danger">$42.50</td>
+                            </tr>
+                            <tr>
+                                <td>Net Operational Savings</td>
+                                <td class="highlight">+99.93%</td>
+                            </tr>
+                            <tr>
+                                <td>Pass Rate (First Attempt)</td>
+                                <td>75%</td>
+                            </tr>
+                            <tr>
+                                <td>AST Policy Violations</td>
+                                <td class="success">0 (Blocked)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="action-panel">
+                    <a href="http://localhost:8000/#playground" target="_blank" class="cyber-button primary-btn">
+                        <span class="btn-text">LAUNCH CHAOS INJECTION</span>
+                        <span class="btn-glitch"></span>
+                    </a>
+                    <div class="secondary-actions">
+                        <a href="https://github.com/tmohagan/ghostmachine-core" target="_blank" class="cyber-button">GITHUB REPO</a>
+                        <a href="https://www.linkedin.com/in/timothy-ohagan/" target="_blank" class="cyber-button">CREATOR UPLINK</a>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
+
     <script>
         const lines = [
             "> INITIALIZING GHOSTMACHINE CORE...",
-            "> AUTONOMOUS SRE AGENT ENGAGED.",
-            "> FAULT DETECTION ACTIVE.",
-            "> AI REMEDIATION PIPELINE READY."
+            "> OTELEMETRY WEBHOOK LISTENER ACTIVE.",
+            "> AST SECURITY GUARDRAILS ENGAGED.",
+            "> AUTONOMOUS REMEDIATION STANDING BY."
         ];
         
         const typingText = document.getElementById("typing-text");
@@ -62,16 +154,15 @@
                 if (charIndex < lines[lineIndex].length) {
                     typingText.innerHTML += lines[lineIndex].charAt(charIndex);
                     charIndex++;
-                    setTimeout(typeWriter, 30); // Speed of typing characters
+                    setTimeout(typeWriter, 20);
                 } else {
                     lineIndex++;
                     charIndex = 0;
-                    setTimeout(typeWriter, 500); // Pause between lines
+                    setTimeout(typeWriter, 300);
                 }
             }
         }
         
-        // Add a blinking cursor effect
         const style = document.createElement('style');
         style.textContent = `
             #typing-text::after {
@@ -86,8 +177,26 @@
         document.head.appendChild(style);
 
         window.onload = () => {
-            setTimeout(typeWriter, 500); // Initial delay before typing starts
+            setTimeout(typeWriter, 300);
         };
+
+        // Interactive Pipeline
+        const steps = document.querySelectorAll('.step');
+        const detailsBox = document.getElementById('step-details');
+        
+        steps.forEach(step => {
+            step.addEventListener('mouseenter', () => {
+                steps.forEach(s => s.classList.remove('active'));
+                step.classList.add('active');
+                detailsBox.innerHTML = `> [SYSTEM] ` + step.getAttribute('data-info');
+                detailsBox.style.color = 'var(--neon-cyan)';
+            });
+            step.addEventListener('mouseleave', () => {
+                step.classList.remove('active');
+                detailsBox.innerHTML = 'Hover over a node to inspect pipeline operations.';
+                detailsBox.style.color = 'var(--text-color)';
+            });
+        });
     </script>
 </body>
 </html>
