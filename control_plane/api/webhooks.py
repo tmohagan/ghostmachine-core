@@ -16,6 +16,7 @@ class AlertPayload(BaseModel):
 def run_remediation(payload: AlertPayload):
     initial_state = {
         "trace_id": payload.trace_id,
+        "incident_id": f"INC-{payload.trace_id[:8].upper()}",
         "exception_class": payload.error_class,
         "stack_frames": payload.traceback.splitlines(),
         "recursion_count": 0,

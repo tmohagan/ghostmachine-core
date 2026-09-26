@@ -52,12 +52,26 @@ class StagingCanaryNode:
         cms_repo_path = os.environ.get("CMS_REPO_PATH", "/home/tim/workspace/tim-ohagan-cms")
         try:
             import subprocess
+            
+            # Apply the generated patch to the repository
+            patch_content = state.get("proposed_patch")
+            if patch_content:
+                patch_file_path = os.path.join(cms_repo_path, "current_fix.patch")
+                with open(patch_file_path, "w") as f:
+                    f.write(patch_content + "\n")
+                
+                # Use git apply to apply the patch
+                subprocess.run(f"cd {cms_repo_path} && git apply current_fix.patch", shell=True, capture_output=True)
+                
+                if os.path.exists(patch_file_path):
+                    os.remove(patch_file_path)
+
             cmd = (
                 f"cd {cms_repo_path} && "
                 f"git config user.name 'GhostMachine SRE' && "
                 f"git config user.email 'bot@ghostmachine.dev' && "
                 f"git checkout -B fix/{incident_id} && "
-                f"git add incidents/ tests/incidents/ 2>/dev/null || true && "
+                f"git add -A && "
                 f"git commit -m 'fix: Autonomous Remediation for {incident_id}' || true && "
                 f"git push origin fix/{incident_id} --force"
             )
