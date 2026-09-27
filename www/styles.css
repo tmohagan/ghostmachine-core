@@ -514,3 +514,30 @@ body {
 .cos-chat-box::-webkit-scrollbar-thumb:hover {
     background: var(--neon-cyan);
 }
+
+@media (max-width: 600px) {
+    .cos-container {
+        height: 500px;
+    }
+    .cos-message {
+        max-width: 95%;
+        font-size: 0.9rem;
+        padding: 8px 10px;
+    }
+    .cos-input-area {
+        flex-direction: row;
+        gap: 8px;
+        padding: 8px;
+    }
+    .cos-prompt {
+        font-size: 1.2rem;
+    }
+    #cos-input {
+        font-size: 1rem;
+        width: 100%;
+    }
+    #cos-send {
+        padding: 10px 15px !important;
+        font-size: 0.9rem;
+    }
+}
