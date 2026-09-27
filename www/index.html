@@ -14,13 +14,14 @@
 
     <div class="container">
         <header class="glitch-wrapper">
-            <h1 class="glitch" data-text="GHOSTMACHINE.DEV">GHOSTMACHINE.DEV</h1>
+            <a href="index.html" style="text-decoration: none; color: inherit;">
+                <h1 class="glitch" data-text="GHOSTMACHINE.DEV">GHOSTMACHINE.DEV</h1>
+            </a>
             <div class="system-status">SYSTEM.STATUS: <span class="online">ONLINE</span></div>
         </header>
 
         <div class="tabs-nav">
-            <button class="tab-btn active" onclick="switchTab('dashboard')">DASHBOARD</button>
-            <button class="tab-btn" onclick="switchTab('pipeline')">PIPELINE</button>
+            <button class="tab-btn" onclick="switchTab('pipeline')">ABOUT</button>
             <button class="tab-btn" onclick="switchTab('uplink')">COS_UPLINK</button>
         </div>
 
@@ -35,21 +36,6 @@
                     </div>
                 </div>
                 <div class="right-col">
-                    <div class="content-panel telemetry-panel">
-                        <h2>Operational Telemetry</h2>
-                        <table class="telemetry-table">
-                            <tbody>
-                                <tr><td>Mean Time to Remediate</td><td class="highlight">~52s</td></tr>
-                                <tr><td>Direct Inference Cost</td><td>$0.0235</td></tr>
-                                <tr><td>Sandbox Compute Cost</td><td>$0.0028</td></tr>
-                                <tr class="total-row"><td>Auto Remediation Cost</td><td class="highlight success">$0.0263</td></tr>
-                                <tr class="baseline-row"><td>Manual Labor Baseline</td><td class="danger">$42.50</td></tr>
-                                <tr><td>Net Operational Savings</td><td class="highlight">+99.93%</td></tr>
-                                <tr><td>Pass Rate (First Attempt)</td><td>75%</td></tr>
-                                <tr><td>AST Policy Violations</td><td class="success">0 (Blocked)</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
                     <div class="action-panel">
                         <a href="https://tim-ohagan.com/#playground" target="_blank" class="cyber-button primary-btn">
                             <span class="btn-text">LAUNCH CHAOS INJECTION</span>
@@ -95,6 +81,22 @@
                 <div id="step-details" class="step-details-box">
                     Hover over a node to inspect pipeline operations.
                 </div>
+            </div>
+            
+            <div class="content-panel telemetry-panel" style="margin-top: 2rem;">
+                <h2>Operational Telemetry</h2>
+                <table class="telemetry-table">
+                    <tbody>
+                        <tr><td>Mean Time to Remediate</td><td class="highlight">~52s</td></tr>
+                        <tr><td>Direct Inference Cost</td><td>$0.0235</td></tr>
+                        <tr><td>Sandbox Compute Cost</td><td>$0.0028</td></tr>
+                        <tr class="total-row"><td>Auto Remediation Cost</td><td class="highlight success">$0.0263</td></tr>
+                        <tr class="baseline-row"><td>Manual Labor Baseline</td><td class="danger">$42.50</td></tr>
+                        <tr><td>Net Operational Savings</td><td class="highlight">+99.93%</td></tr>
+                        <tr><td>Pass Rate (First Attempt)</td><td>75%</td></tr>
+                        <tr><td>AST Policy Violations</td><td class="success">0 (Blocked)</td></tr>
+                    </tbody>
+                </table>
             </div>
         </section>
 
