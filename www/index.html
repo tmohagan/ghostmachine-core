@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GhostMachine | Autonomous SRE Control Plane</title>
     <meta name="description" content="ghostmachine.dev - Autonomous SRE system with AI-driven remediation.">
     <link rel="stylesheet" href="styles.css?v=1.1">
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;600;800&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     <div class="scanlines"></div>
     <div class="grid-bg"></div>
@@ -24,7 +27,9 @@
             <button class="tab-btn" onclick="switchTab('pipeline')">ABOUT</button>
             <button class="tab-btn" onclick="switchTab('demo')">DEMO</button>
             <button class="tab-btn" onclick="switchTab('uplink')">COS_UPLINK</button>
-            <a href="https://github.com/tmohagan/ghostmachine-core" target="_blank" class="tab-btn" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">GITHUB REPO</a>
+            <a href="https://github.com/tmohagan/ghostmachine-core" target="_blank" class="tab-btn"
+                style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">GITHUB
+                REPO</a>
         </div>
 
         <section id="tab-dashboard" class="tab-pane active">
@@ -33,10 +38,15 @@
                     <div class="content-panel summary-panel">
                         <p id="typing-text" class="terminal-text"></p>
                         <p class="summary">
-                            GhostMachine is an autonomous Site Reliability Engineering (SRE) orchestrator. When the target application crashes, it ingests the OpenTelemetry trace, synthesizes a reproduction test, drafts a patch via LLM, statically analyzes it for security, and ships a verified Pull Request to GitHub in under 90 seconds.
+                            GhostMachine is an autonomous Site Reliability Engineering (SRE) orchestrator. When the
+                            target application crashes, it ingests the OpenTelemetry trace, synthesizes a reproduction
+                            test, drafts a patch via LLM, statically analyzes it for security, and ships a verified Pull
+                            Request to GitHub in under 90 seconds.
                         </p>
                         <div style="margin-top: 1.5rem;">
-                            <a href="https://www.linkedin.com/in/timothy-ohagan/" target="_blank" style="color: var(--neon-cyan); text-decoration: none; font-size: 0.9em; border-bottom: 1px dashed var(--neon-cyan);">Created by Timothy O'Hagan</a>
+                            <a href="https://www.linkedin.com/in/timothy-ohagan/" target="_blank"
+                                style="color: var(--neon-cyan); text-decoration: none; font-size: 0.9em; border-bottom: 1px dashed var(--neon-cyan);">Created
+                                by Tim O'Hagan</a>
                         </div>
                     </div>
                 </div>
@@ -44,50 +54,96 @@
         </section>
 
         <section id="tab-pipeline" class="tab-pane">
+            <div class="content-panel about-panel" style="margin-bottom: 2rem;">
+                <h2>About GhostMachine</h2>
+                <p style="margin-bottom: 1rem; line-height: 1.6;">
+                    GhostMachine is an autonomous Site Reliability Engineering (SRE) system designed to detect, diagnose, and remediate production faults in real-time. It acts as an AI-driven control plane that continuously monitors your infrastructure for errors.
+                </p>
+                <p style="line-height: 1.6;">
+                    When an application crashes, GhostMachine instantly receives the OpenTelemetry trace and gets to work. It synthesizes a failing reproduction test, drafts a patch using advanced language models, verifies the fix in an ephemeral sandbox, and automatically submits a verified Pull Request—all in under 90 seconds.
+                </p>
+            </div>
+
             <div class="content-panel pipeline-panel">
                 <h2>LangGraph Remediation Pipeline</h2>
                 <div class="pipeline-stepper">
-                    <div class="step" data-info="Ingests 5xx webhook, parses OpenTelemetry span, stack frames, and request vector.">
-                        <div class="step-num">1</div><div class="step-name">Ingest Span</div>
+                    <div class="step"
+                        data-info="Ingests 5xx webhook, parses OpenTelemetry span, stack frames, and request vector.">
+                        <div class="step-num">1</div>
+                        <div class="step-name">Ingest Span</div>
                     </div>
                     <div class="step-connector"></div>
-                    <div class="step" data-info="Analyzes traceback to generate isolated pytest reproduction test using httpx.">
-                        <div class="step-num">2</div><div class="step-name">Repro Test</div>
+                    <div class="step"
+                        data-info="Analyzes traceback to generate isolated pytest reproduction test using httpx.">
+                        <div class="step-num">2</div>
+                        <div class="step-name">Repro Test</div>
                     </div>
                     <div class="step-connector"></div>
-                    <div class="step" data-info="Executes test in ephemeral Docker sandbox. Must fail (Exit Code != 0) to validate bug.">
-                        <div class="step-num">3</div><div class="step-name">Sandbox (Init)</div>
+                    <div class="step"
+                        data-info="Executes test in ephemeral Docker sandbox. Must fail (Exit Code != 0) to validate bug.">
+                        <div class="step-num">3</div>
+                        <div class="step-name">Sandbox (Init)</div>
                     </div>
                     <div class="step-connector"></div>
-                    <div class="step" data-info="LLM drafts patch. Python AST guardrails block unsafe paths and bare exceptions.">
-                        <div class="step-num">4</div><div class="step-name">Patch & AST Audit</div>
+                    <div class="step"
+                        data-info="LLM drafts patch. Python AST guardrails block unsafe paths and bare exceptions.">
+                        <div class="step-num">4</div>
+                        <div class="step-name">Patch & AST Audit</div>
                     </div>
                     <div class="step-connector"></div>
-                    <div class="step" data-info="Runs Repro + Full Regression test suite on patched sandbox. Must pass (Exit Code 0).">
-                        <div class="step-num">5</div><div class="step-name">Regression Test</div>
+                    <div class="step"
+                        data-info="Runs Repro + Full Regression test suite on patched sandbox. Must pass (Exit Code 0).">
+                        <div class="step-num">5</div>
+                        <div class="step-name">Regression Test</div>
                     </div>
                     <div class="step-connector"></div>
-                    <div class="step" data-info="Stages canary and automatically submits verified GitHub PR with telemetry ledger.">
-                        <div class="step-num">6</div><div class="step-name">GitHub PR</div>
+                    <div class="step"
+                        data-info="Stages canary and automatically submits verified GitHub PR with telemetry ledger.">
+                        <div class="step-num">6</div>
+                        <div class="step-name">GitHub PR</div>
                     </div>
                 </div>
                 <div id="step-details" class="step-details-box">
                     Hover over a node to inspect pipeline operations.
                 </div>
             </div>
-            
+
             <div class="content-panel telemetry-panel" style="margin-top: 2rem;">
                 <h2>Operational Telemetry</h2>
                 <table class="telemetry-table">
                     <tbody>
-                        <tr><td>Mean Time to Remediate</td><td class="highlight">~52s</td></tr>
-                        <tr><td>Direct Inference Cost</td><td>$0.0235</td></tr>
-                        <tr><td>Sandbox Compute Cost</td><td>$0.0028</td></tr>
-                        <tr class="total-row"><td>Auto Remediation Cost</td><td class="highlight success">$0.0263</td></tr>
-                        <tr class="baseline-row"><td>Manual Labor Baseline</td><td class="danger">$42.50</td></tr>
-                        <tr><td>Net Operational Savings</td><td class="highlight">+99.93%</td></tr>
-                        <tr><td>Pass Rate (First Attempt)</td><td>75%</td></tr>
-                        <tr><td>AST Policy Violations</td><td class="success">0 (Blocked)</td></tr>
+                        <tr>
+                            <td>Mean Time to Remediate</td>
+                            <td class="highlight">~52s</td>
+                        </tr>
+                        <tr>
+                            <td>Direct Inference Cost</td>
+                            <td>$0.0235</td>
+                        </tr>
+                        <tr>
+                            <td>Sandbox Compute Cost</td>
+                            <td>$0.0028</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>Auto Remediation Cost</td>
+                            <td class="highlight success">$0.0263</td>
+                        </tr>
+                        <tr class="baseline-row">
+                            <td>Manual Labor Baseline</td>
+                            <td class="danger">$42.50</td>
+                        </tr>
+                        <tr>
+                            <td>Net Operational Savings</td>
+                            <td class="highlight">+99.93%</td>
+                        </tr>
+                        <tr>
+                            <td>Pass Rate (First Attempt)</td>
+                            <td>75%</td>
+                        </tr>
+                        <tr>
+                            <td>AST Policy Violations</td>
+                            <td class="success">0 (Blocked)</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -96,8 +152,10 @@
         <section id="tab-demo" class="tab-pane">
             <div class="content-panel summary-panel">
                 <h2>Live Demonstration</h2>
-                <p style="margin-bottom: 2rem;">GhostMachine is actively monitoring the Tim O'Hagan CMS. You can witness it in action by intentionally injecting faults and watching the autonomous remediation process in real-time.</p>
-                
+                <p style="margin-bottom: 2rem;">GhostMachine is actively monitoring the Tim O'Hagan CMS. You can witness
+                    it in action by intentionally injecting faults and watching the autonomous remediation process in
+                    real-time.</p>
+
                 <a href="https://tim-ohagan.com/#playground" target="_blank" class="cyber-button primary-btn">
                     <span class="btn-text">LAUNCH CHAOS INJECTION</span>
                     <span class="btn-glitch"></span>
@@ -126,17 +184,17 @@
             "> AST SECURITY GUARDRAILS ENGAGED.",
             "> AUTONOMOUS REMEDIATION STANDING BY."
         ];
-        
+
         const typingText = document.getElementById("typing-text");
         let lineIndex = 0;
         let charIndex = 0;
-        
+
         function typeWriter() {
             if (lineIndex < lines.length) {
                 if (charIndex === 0 && lineIndex > 0) {
                     typingText.innerHTML += "<br>";
                 }
-                
+
                 if (charIndex < lines[lineIndex].length) {
                     typingText.innerHTML += lines[lineIndex].charAt(charIndex);
                     charIndex++;
@@ -148,7 +206,7 @@
                 }
             }
         }
-        
+
         const style = document.createElement('style');
         style.textContent = `
             #typing-text::after {
@@ -169,7 +227,7 @@
         // Interactive Pipeline
         const steps = document.querySelectorAll('.step');
         const detailsBox = document.getElementById('step-details');
-        
+
         steps.forEach(step => {
             step.addEventListener('mouseenter', () => {
                 steps.forEach(s => s.classList.remove('active'));
@@ -203,7 +261,7 @@
 
             appendMessage(text, 'user');
             chatInput.value = '';
-            
+
             // Add typing indicator
             const typingDiv = document.createElement('div');
             typingDiv.className = 'cos-message cos typing';
@@ -213,9 +271,9 @@
 
             try {
                 // Determine base URL, assuming FastAPI is running on port 8000
-                const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-                                ? 'http://localhost:8000' 
-                                : window.location.origin;
+                const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                    ? 'http://localhost:8000'
+                    : window.location.origin;
 
                 const response = await fetch(`${baseUrl}/api/cos/chat`, {
                     method: 'POST',
@@ -255,4 +313,5 @@
         }
     </script>
 </body>
+
 </html>
