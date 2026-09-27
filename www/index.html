@@ -27,113 +27,87 @@
             <div class="system-status">SYSTEM.STATUS: <span class="online">ONLINE</span></div>
         </header>
 
-        <section class="dashboard-grid">
-            
-            <!-- Left Column: Pipeline & Summary -->
-            <div class="left-col">
-                <div class="content-panel summary-panel">
-                    <p id="typing-text" class="terminal-text"></p>
-                    <p class="summary">
-                        GhostMachine is an autonomous Site Reliability Engineering (SRE) orchestrator. When the target application crashes, it ingests the OpenTelemetry trace, synthesizes a reproduction test, drafts a patch via LLM, statically analyzes it for security, and ships a verified Pull Request to GitHub in under 90 seconds.
-                    </p>
-                </div>
+        <div class="tabs-nav">
+            <button class="tab-btn active" onclick="switchTab('dashboard')">DASHBOARD</button>
+            <button class="tab-btn" onclick="switchTab('pipeline')">PIPELINE</button>
+            <button class="tab-btn" onclick="switchTab('uplink')">COS_UPLINK</button>
+        </div>
 
-                <div class="content-panel pipeline-panel">
-                    <h2>LangGraph Remediation Pipeline</h2>
-                    <div class="pipeline-stepper">
-                        <div class="step" data-info="Ingests 5xx webhook, parses OpenTelemetry span, stack frames, and request vector.">
-                            <div class="step-num">1</div>
-                            <div class="step-name">Ingest Span</div>
-                        </div>
-                        <div class="step-connector"></div>
-                        <div class="step" data-info="Analyzes traceback to generate isolated pytest reproduction test using httpx.">
-                            <div class="step-num">2</div>
-                            <div class="step-name">Repro Test</div>
-                        </div>
-                        <div class="step-connector"></div>
-                        <div class="step" data-info="Executes test in ephemeral Docker sandbox. Must fail (Exit Code != 0) to validate bug.">
-                            <div class="step-num">3</div>
-                            <div class="step-name">Sandbox (Init)</div>
-                        </div>
-                        <div class="step-connector"></div>
-                        <div class="step" data-info="LLM drafts patch. Python AST guardrails block unsafe paths and bare exceptions.">
-                            <div class="step-num">4</div>
-                            <div class="step-name">Patch & AST Audit</div>
-                        </div>
-                        <div class="step-connector"></div>
-                        <div class="step" data-info="Runs Repro + Full Regression test suite on patched sandbox. Must pass (Exit Code 0).">
-                            <div class="step-num">5</div>
-                            <div class="step-name">Regression Test</div>
-                        </div>
-                        <div class="step-connector"></div>
-                        <div class="step" data-info="Stages canary and automatically submits verified GitHub PR with telemetry ledger.">
-                            <div class="step-num">6</div>
-                            <div class="step-name">GitHub PR</div>
-                        </div>
-                    </div>
-                    <div id="step-details" class="step-details-box">
-                        Hover over a node to inspect pipeline operations.
+        <section id="tab-dashboard" class="tab-pane active">
+            <div class="dashboard-grid">
+                <div class="left-col">
+                    <div class="content-panel summary-panel">
+                        <p id="typing-text" class="terminal-text"></p>
+                        <p class="summary">
+                            GhostMachine is an autonomous Site Reliability Engineering (SRE) orchestrator. When the target application crashes, it ingests the OpenTelemetry trace, synthesizes a reproduction test, drafts a patch via LLM, statically analyzes it for security, and ships a verified Pull Request to GitHub in under 90 seconds.
+                        </p>
                     </div>
                 </div>
-            </div>
-
-            <!-- Right Column: Telemetry & Actions -->
-            <div class="right-col">
-                <div class="content-panel telemetry-panel">
-                    <h2>Operational Telemetry</h2>
-                    <table class="telemetry-table">
-                        <tbody>
-                            <tr>
-                                <td>Mean Time to Remediate</td>
-                                <td class="highlight">~52s</td>
-                            </tr>
-                            <tr>
-                                <td>Direct Inference Cost</td>
-                                <td>$0.0235</td>
-                            </tr>
-                            <tr>
-                                <td>Sandbox Compute Cost</td>
-                                <td>$0.0028</td>
-                            </tr>
-                            <tr class="total-row">
-                                <td>Auto Remediation Cost</td>
-                                <td class="highlight success">$0.0263</td>
-                            </tr>
-                            <tr class="baseline-row">
-                                <td>Manual Labor Baseline</td>
-                                <td class="danger">$42.50</td>
-                            </tr>
-                            <tr>
-                                <td>Net Operational Savings</td>
-                                <td class="highlight">+99.93%</td>
-                            </tr>
-                            <tr>
-                                <td>Pass Rate (First Attempt)</td>
-                                <td>75%</td>
-                            </tr>
-                            <tr>
-                                <td>AST Policy Violations</td>
-                                <td class="success">0 (Blocked)</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="action-panel">
-                    <a href="http://localhost:8000/#playground" target="_blank" class="cyber-button primary-btn">
-                        <span class="btn-text">LAUNCH CHAOS INJECTION</span>
-                        <span class="btn-glitch"></span>
-                    </a>
-                    <div class="secondary-actions">
-                        <a href="https://github.com/tmohagan/ghostmachine-core" target="_blank" class="cyber-button">GITHUB REPO</a>
-                        <a href="https://www.linkedin.com/in/timothy-ohagan/" target="_blank" class="cyber-button">CREATOR UPLINK</a>
+                <div class="right-col">
+                    <div class="content-panel telemetry-panel">
+                        <h2>Operational Telemetry</h2>
+                        <table class="telemetry-table">
+                            <tbody>
+                                <tr><td>Mean Time to Remediate</td><td class="highlight">~52s</td></tr>
+                                <tr><td>Direct Inference Cost</td><td>$0.0235</td></tr>
+                                <tr><td>Sandbox Compute Cost</td><td>$0.0028</td></tr>
+                                <tr class="total-row"><td>Auto Remediation Cost</td><td class="highlight success">$0.0263</td></tr>
+                                <tr class="baseline-row"><td>Manual Labor Baseline</td><td class="danger">$42.50</td></tr>
+                                <tr><td>Net Operational Savings</td><td class="highlight">+99.93%</td></tr>
+                                <tr><td>Pass Rate (First Attempt)</td><td>75%</td></tr>
+                                <tr><td>AST Policy Violations</td><td class="success">0 (Blocked)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="action-panel">
+                        <a href="http://localhost:8000/#playground" target="_blank" class="cyber-button primary-btn">
+                            <span class="btn-text">LAUNCH CHAOS INJECTION</span>
+                            <span class="btn-glitch"></span>
+                        </a>
+                        <div class="secondary-actions">
+                            <a href="https://github.com/tmohagan/ghostmachine-core" target="_blank" class="cyber-button">GITHUB REPO</a>
+                            <a href="https://www.linkedin.com/in/timothy-ohagan/" target="_blank" class="cyber-button">CREATOR UPLINK</a>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
-        
-        <!-- COS Chat Interface -->
-        <section class="cos-panel" style="margin-top: 30px;">
+
+        <section id="tab-pipeline" class="tab-pane">
+            <div class="content-panel pipeline-panel">
+                <h2>LangGraph Remediation Pipeline</h2>
+                <div class="pipeline-stepper">
+                    <div class="step" data-info="Ingests 5xx webhook, parses OpenTelemetry span, stack frames, and request vector.">
+                        <div class="step-num">1</div><div class="step-name">Ingest Span</div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="step" data-info="Analyzes traceback to generate isolated pytest reproduction test using httpx.">
+                        <div class="step-num">2</div><div class="step-name">Repro Test</div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="step" data-info="Executes test in ephemeral Docker sandbox. Must fail (Exit Code != 0) to validate bug.">
+                        <div class="step-num">3</div><div class="step-name">Sandbox (Init)</div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="step" data-info="LLM drafts patch. Python AST guardrails block unsafe paths and bare exceptions.">
+                        <div class="step-num">4</div><div class="step-name">Patch & AST Audit</div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="step" data-info="Runs Repro + Full Regression test suite on patched sandbox. Must pass (Exit Code 0).">
+                        <div class="step-num">5</div><div class="step-name">Regression Test</div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="step" data-info="Stages canary and automatically submits verified GitHub PR with telemetry ledger.">
+                        <div class="step-num">6</div><div class="step-name">GitHub PR</div>
+                    </div>
+                </div>
+                <div id="step-details" class="step-details-box">
+                    Hover over a node to inspect pipeline operations.
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-uplink" class="tab-pane">
             <div class="content-panel cos-container">
                 <h2>[ COS_UPLINK.EXE ]</h2>
                 <div class="cos-chat-box" id="cos-chat-box">
@@ -269,6 +243,18 @@
         chatInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
         });
+
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
     </script>
 </body>
 </html>
