@@ -11,6 +11,7 @@ services:
       - GITHUB_TOKEN=${GITHUB_TOKEN}
       - GITHUB_REPO=${GITHUB_REPO:-tmohagan/tim-ohagan-cms}
       - CMS_REPO_PATH=${CMS_REPO_PATH:-/opt/ghostmachine/tim-ohagan-cms}
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET:-supersecretwebhook123}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${CMS_REPO_PATH:-/opt/ghostmachine/tim-ohagan-cms}:${CMS_REPO_PATH:-/opt/ghostmachine/tim-ohagan-cms}

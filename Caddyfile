@@ -1,10 +1,46 @@
+www.tim-ohagan.local {
+    tls internal
+    redir https://tim-ohagan.local{uri} permanent
+}
+
 tim-ohagan.local {
     tls internal
+    encode zstd gzip
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        -Server
+    }
+
+    @static {
+        path /static/*
+    }
+    header @static Cache-Control "public, max-age=604800, stale-while-revalidate=86400"
+
     reverse_proxy cms-app:8000
+}
+
+www.ghostmachine.local {
+    tls internal
+    redir https://ghostmachine.local{uri} permanent
 }
 
 ghostmachine.local {
     tls internal
+    encode zstd gzip
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        -Server
+    }
     
     handle /api/* {
         reverse_proxy control-plane:8000
@@ -12,6 +48,10 @@ ghostmachine.local {
     
     handle {
         root * /var/www/html
+        @static {
+            path *.css *.js *.jpg *.jpeg *.png *.webp *.svg *.ico *.woff2
+        }
+        header @static Cache-Control "public, max-age=604800, stale-while-revalidate=86400"
         file_server
     }
 }
