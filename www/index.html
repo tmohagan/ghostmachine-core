@@ -23,7 +23,10 @@
             <div class="system-status">SYSTEM.STATUS: <span class="online">ONLINE</span></div>
         </header>
 
-        <div class="tabs-nav">
+        <div class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+            <span>[ NAVIGATION MENU ]</span>
+        </div>
+        <div class="tabs-nav" id="tabs-nav">
             <button class="tab-btn" onclick="switchTab('pipeline')">ABOUT</button>
             <button class="tab-btn" onclick="switchTab('demo')">DEMO</button>
             <button class="tab-btn" onclick="switchTab('uplink')">COS_UPLINK</button>
@@ -300,6 +303,12 @@
             if (e.key === 'Enter') sendMessage();
         });
 
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const nav = document.getElementById('tabs-nav');
+            nav.classList.toggle('open');
+        }
+
         // Tab Switching Logic
         function switchTab(tabId) {
             document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -310,6 +319,11 @@
             });
             event.target.classList.add('active');
             document.getElementById('tab-' + tabId).classList.add('active');
+            
+            const nav = document.getElementById('tabs-nav');
+            if (nav && nav.classList.contains('open')) {
+                nav.classList.remove('open');
+            }
         }
     </script>
 </body>
