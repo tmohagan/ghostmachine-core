@@ -1,57 +1,100 @@
-# GhostMachine
+# GhostMachine SRE Control Plane
+
+[![Live Production](https://img.shields.io/badge/Live-ghostmachine.dev-00ffff?style=flat-square)](https://ghostmachine.dev)
+[![Target CMS](https://img.shields.io/badge/Target-tim--ohagan.com-38bdf8?style=flat-square)](https://tim-ohagan.com)
+[![LangGraph](https://img.shields.io/badge/Orchestrator-LangGraph-orange?style=flat-square)](https://github.com/langchain-ai/langgraph)
+[![Gemini](https://img.shields.io/badge/LLM-Google%20Gemini-8e24aa?style=flat-square)](https://ai.google.dev/)
+[![Docker](https://img.shields.io/badge/Sandbox-Docker-2496ed?style=flat-square)](https://www.docker.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
 > **SYSTEM.STATUS: ONLINE**<br>
-> INITIALIZING GHOSTMACHINE CORE...<br>
-> AUTONOMOUS SRE AGENT ENGAGED.<br>
-> FAULT DETECTION ACTIVE.<br>
-> AI REMEDIATION PIPELINE READY.<br>
+> CENTRAL OPERATING SYSTEM (COS) ACTIVE.<br>
+> OPENTELEMETRY INGESTION ENGAGED.<br>
+> AST STATIC GUARDRAILS ACTIVE.<br>
+> AUTONOMOUS REMEDIATION PIPELINE READY.
 
-[**ghostmachine.dev**](https://ghostmachine.dev)
+[**ghostmachine.dev**](https://ghostmachine.dev) is an autonomous Site Reliability Engineering (SRE) control plane. When connected target applications encounter production faults, GhostMachine ingests the error trace, synthesizes an isolated reproduction test, drafts a code fix via language models, audits the patch against compiler-level AST guardrails, verifies it in an ephemeral sandbox, and submits a pull request with an economic post-mortem in under 90 seconds.
 
-GhostMachine is an autonomous Site Reliability Engineering (SRE) system designed to detect, diagnose, and remediate faults in real-time. Utilizing advanced language models, it generates and tests patches before automatically submitting pull requests to ensure system uptime and stability.
+---
 
-## Overview
+## Live Endpoints
 
-Modern infrastructure is complex, and diagnosing unexpected production faults takes time. GhostMachine acts as an AI-driven control plane that continuously listens for system faults (e.g., from an attached application like the [Tim O'Hagan CMS](https://github.com/tmohagan/tim-ohagan-cms)). When an exception occurs:
-1. **Detection**: The control plane receives a webhook containing the error trace.
-2. **Analysis**: An adversarial fuzzer and LLM orchestration layer diagnose the root cause of the fault.
-3. **Remediation**: GhostMachine synthesizes a patch to resolve the issue.
-4. **Resolution**: A Pull Request is automatically generated and submitted to the target repository.
+- **Production URL**: [https://ghostmachine.dev](https://ghostmachine.dev) (Canonical)
+- **Subdomain**: [https://www.ghostmachine.dev](https://www.ghostmachine.dev) (Automated 301 Redirect)
+- **Interactive COS Uplink**: [https://ghostmachine.dev/#uplink](https://ghostmachine.dev/#uplink)
+- **Remediation Pipeline**: [https://ghostmachine.dev/#pipeline](https://ghostmachine.dev/#pipeline)
+- **Live Chaos Trigger**: [https://ghostmachine.dev/#demo](https://ghostmachine.dev/#demo) -> [tim-ohagan.com/#playground](https://tim-ohagan.com/#playground)
 
-## Components
+---
 
-- **Control Plane**: A FastAPI application that acts as the ingress for webhooks and coordinates the SRE tasks.
-- **Chaos Harness**: Adversarial fuzzing and evaluation nodes to test and validate patches.
-- **Orchestrator**: Nodes dedicated to prompting language models to synthesize code patches.
-- **Ingress Proxy**: Caddy server configured for automatic TLS provisioning and traffic routing.
+## Remediation Workflow (LangGraph State Machine)
 
-## Technology Stack
+```
+[ Ingest Span ] ──▶ [ Repro Test ] ──▶ [ Ephemeral Sandbox ] ──▶ [ Patch Synthesis ] ──▶ [ AST Guardrails ] ──▶ [ GitHub PR ]
+```
 
-- **Framework**: FastAPI (Python 3.11)
-- **AI/LLM**: Google Gemini (via `google-genai` SDK)
-- **Ingress**: Caddy (Dockerized)
-- **Orchestration**: Docker Compose
+1. **Ingest Span**: Intercepts 5xx fault webhooks and parses stack frames, request vectors, and OpenTelemetry trace context.
+2. **Repro Test Synthesis**: Generates a standalone `pytest` test case replicating the exact crash condition using `httpx`.
+3. **Sandbox Execution**: Executes the reproduction test inside an isolated Docker container with strict compute and memory constraints. The test must fail (`exit_code != 0`) to confirm bug reproducibility.
+4. **Patch Synthesis & AST Guardrails**:
+   - Generates minimal unified git diffs (capped at 80 lines).
+   - Validates diffs against Python's native `ast` compiler: detects bare `except:` blocks, restricts dangerous system primitives, and enforces zero-trust code generation.
+5. **Regression Verification**: Runs both reproduction tests and the site's full regression test suite inside the patched container (`exit_code == 0`).
+6. **Canary Staging & PR Submission**: Opens a validated GitHub Pull Request containing an automated SRE Post-Mortem and an Economic Telemetry Ledger comparing automation cost (~$0.026) vs manual engineering baseline (~$42.50).
+
+---
+
+## Control Plane & Components
+
+- **Control Plane API (`control_plane/`)**: FastAPI server providing webhook ingestion and health checks.
+- **Webhook Ingestion (`POST /api/webhooks`)**: Protected with timing-attack resistant shared secret verification (`X-GhostMachine-Secret`).
+- **COS Uplink AI (`POST /api/cos/chat`)**: Interactive persona chatbot powered by Google Gemini (`gemini-3.8-flash`) simulating the Central Operating System.
+- **Orchestrator (`orchestrator/`)**: Typed `LangGraph` StateGraph coordinating node state across ingestion, reproduction, patching, and staging.
+- **Caddy Ingress Proxy (`Caddyfile`)**: Production reverse proxy with automatic Let's Encrypt certificates for apex and `www.` domains, modern Zstandard/Gzip compression, and hardened security headers (`HSTS`, `nosniff`, `SAMEORIGIN`).
+
+---
+
+## Environment Variables
+
+| Variable | Description |
+| :--- | :--- |
+| `GEMINI_API_KEY` | Google AI Studio API Key for patch synthesis and COS chat |
+| `GITHUB_TOKEN` | GitHub Personal Access Token for creating remediation branches and PRs |
+| `GITHUB_REPO` | Target repository identifier (e.g., `tmohagan/tim-ohagan-cms`) |
+| `CMS_REPO_PATH` | Path to target codebase on disk or mounted container volume |
+| `WEBHOOK_SECRET` | Shared secret key required on `POST /api/webhooks` |
+
+---
 
 ## Setup and Deployment
 
-GhostMachine is designed to be deployed alongside its target applications.
+### 1. Configure Environment
+Create a `.env` file in the project root:
+```ini
+GEMINI_API_KEY=your_gemini_api_key
+GITHUB_TOKEN=your_github_token
+GITHUB_REPO=tmohagan/tim-ohagan-cms
+CMS_REPO_PATH=/opt/ghostmachine/tim-ohagan-cms
+WEBHOOK_SECRET=your_super_secret_webhook_key
+```
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/tmohagan/ghostmachine-core.git
-   cd ghostmachine-core
-   ```
-2. Configure your environment variables in a `.env` file (e.g., `GEMINI_API_KEY`, GitHub credentials).
-3. Start the system:
-   ```bash
-   docker network create ghostmachine-bridge
-   docker compose -f compose.yaml -f compose.proxy.yaml up -d --build
-   ```
+### 2. Launch with Docker Compose
+```bash
+# Create shared bridge network
+docker network create ghostmachine-bridge
+
+# Build and start control plane and Caddy ingress
+docker compose -f compose.yaml -f compose.proxy.yaml up -d --build
+```
+
+---
 
 ## Reference Target
 
-GhostMachine is designed to monitor and remediate the [Tim O'Hagan CMS](https://github.com/tmohagan/tim-ohagan-cms). The CMS includes a dedicated chaos playground for fault injection testing.
+GhostMachine actively monitors [tim-ohagan.com](https://tim-ohagan.com) (repo: [tim-ohagan-cms](https://github.com/tmohagan/tim-ohagan-cms)). Trigger live failure vectors in the [Chaos Playground](https://tim-ohagan.com/#playground) to witness real-time fault detection and PR synthesis.
+
+---
 
 ## License
 
-MIT License
+MIT License. Developed by [Tim O'Hagan](https://github.com/tmohagan).
