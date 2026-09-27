@@ -583,8 +583,17 @@ body {
 }
 
 @media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+    .content-panel {
+        padding: 10px;
+    }
     .cos-container {
         height: 500px;
+    }
+    .cos-chat-box {
+        padding: 10px;
     }
     .cos-message {
         max-width: 95%;
