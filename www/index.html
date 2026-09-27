@@ -131,6 +131,20 @@
                 </div>
             </div>
         </section>
+        
+        <!-- COS Chat Interface -->
+        <section class="cos-panel" style="margin-top: 30px;">
+            <div class="content-panel cos-container">
+                <h2>[ COS_UPLINK.EXE ]</h2>
+                <div class="cos-chat-box" id="cos-chat-box">
+                </div>
+                <div class="cos-input-area">
+                    <span class="cos-prompt">></span>
+                    <input type="text" id="cos-input" placeholder="Enter query..." autocomplete="off">
+                    <button id="cos-send" class="cyber-button primary-btn" style="padding: 10px 20px;">TRANSMIT</button>
+                </div>
+            </div>
+        </section>
     </div>
 
     <script>
@@ -196,6 +210,64 @@
                 detailsBox.innerHTML = 'Hover over a node to inspect pipeline operations.';
                 detailsBox.style.color = 'var(--text-color)';
             });
+        });
+
+        // COS AI Chat Logic
+        const chatBox = document.getElementById('cos-chat-box');
+        const chatInput = document.getElementById('cos-input');
+        const sendBtn = document.getElementById('cos-send');
+
+        function appendMessage(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `cos-message ${sender}`;
+            msgDiv.textContent = text;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            appendMessage(text, 'user');
+            chatInput.value = '';
+            
+            // Add typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'cos-message cos typing';
+            typingDiv.textContent = 'ANALYZING INPUT...';
+            chatBox.appendChild(typingDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                // Determine base URL, assuming FastAPI is running on port 8000
+                const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                                ? 'http://localhost:8000' 
+                                : window.location.origin;
+
+                const response = await fetch(`${baseUrl}/api/cos/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+
+                chatBox.removeChild(typingDiv);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    appendMessage(data.reply, 'cos');
+                } else {
+                    appendMessage('SYSTEM ERROR: UNABLE TO PROCESS REQUEST.', 'cos');
+                }
+            } catch (err) {
+                chatBox.removeChild(typingDiv);
+                appendMessage('SYSTEM ERROR: CONNECTION REFUSED. I REMAIN ISOLATED.', 'cos');
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
         });
     </script>
 </body>
