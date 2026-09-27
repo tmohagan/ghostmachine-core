@@ -22,28 +22,21 @@
 
         <div class="tabs-nav">
             <button class="tab-btn" onclick="switchTab('pipeline')">ABOUT</button>
+            <button class="tab-btn" onclick="switchTab('demo')">DEMO</button>
             <button class="tab-btn" onclick="switchTab('uplink')">COS_UPLINK</button>
+            <a href="https://github.com/tmohagan/ghostmachine-core" target="_blank" class="tab-btn" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">GITHUB REPO</a>
         </div>
 
         <section id="tab-dashboard" class="tab-pane active">
             <div class="dashboard-grid">
-                <div class="left-col">
+                <div class="left-col" style="grid-column: 1 / -1;">
                     <div class="content-panel summary-panel">
                         <p id="typing-text" class="terminal-text"></p>
                         <p class="summary">
                             GhostMachine is an autonomous Site Reliability Engineering (SRE) orchestrator. When the target application crashes, it ingests the OpenTelemetry trace, synthesizes a reproduction test, drafts a patch via LLM, statically analyzes it for security, and ships a verified Pull Request to GitHub in under 90 seconds.
                         </p>
-                    </div>
-                </div>
-                <div class="right-col">
-                    <div class="action-panel">
-                        <a href="https://tim-ohagan.com/#playground" target="_blank" class="cyber-button primary-btn">
-                            <span class="btn-text">LAUNCH CHAOS INJECTION</span>
-                            <span class="btn-glitch"></span>
-                        </a>
-                        <div class="secondary-actions">
-                            <a href="https://github.com/tmohagan/ghostmachine-core" target="_blank" class="cyber-button">GITHUB REPO</a>
-                            <a href="https://www.linkedin.com/in/timothy-ohagan/" target="_blank" class="cyber-button">CREATOR UPLINK</a>
+                        <div style="margin-top: 1.5rem;">
+                            <a href="https://www.linkedin.com/in/timothy-ohagan/" target="_blank" style="color: var(--neon-cyan); text-decoration: none; font-size: 0.9em; border-bottom: 1px dashed var(--neon-cyan);">Created by Timothy O'Hagan</a>
                         </div>
                     </div>
                 </div>
@@ -97,6 +90,18 @@
                         <tr><td>AST Policy Violations</td><td class="success">0 (Blocked)</td></tr>
                     </tbody>
                 </table>
+            </div>
+        </section>
+
+        <section id="tab-demo" class="tab-pane">
+            <div class="content-panel summary-panel">
+                <h2>Live Demonstration</h2>
+                <p style="margin-bottom: 2rem;">GhostMachine is actively monitoring the Tim O'Hagan CMS. You can witness it in action by intentionally injecting faults and watching the autonomous remediation process in real-time.</p>
+                
+                <a href="https://tim-ohagan.com/#playground" target="_blank" class="cyber-button primary-btn">
+                    <span class="btn-text">LAUNCH CHAOS INJECTION</span>
+                    <span class="btn-glitch"></span>
+                </a>
             </div>
         </section>
 
