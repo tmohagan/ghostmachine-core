@@ -535,9 +535,12 @@ body {
     #cos-input {
         font-size: 1rem;
         width: 100%;
+        flex-grow: 1;
     }
     #cos-send {
-        padding: 10px 15px !important;
-        font-size: 0.9rem;
+        padding: 10px 12px !important;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+        letter-spacing: 0px;
     }
 }
