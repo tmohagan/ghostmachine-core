@@ -34,7 +34,7 @@
 ```
 
 1. **Ingest Span**: Intercepts 5xx fault webhooks and parses stack frames, request vectors, and OpenTelemetry trace context.
-2. **Repro Test Synthesis**: Generates a standalone `pytest` test case replicating the exact crash condition using `httpx`.
+2. **Repro Test Synthesis**: Generates a standalone `pytest` test case replicating the exact crash condition using `httpx`, dynamically resolving endpoint routes and operations from OpenAPI specifications.
 3. **Sandbox Execution**: Executes the reproduction test inside an isolated Docker container with strict compute and memory constraints. Patches are applied leniently via `patch -p1` with Docker volume `safe.directory` handling. The test must fail (`exit_code != 0`) to confirm bug reproducibility.
 4. **Patch Synthesis & AST Guardrails**:
    - Generates minimal unified git diffs (capped at 80 lines).
@@ -50,7 +50,7 @@
 
 ## Control Plane & Components
 
-- **Control Plane API (`control_plane/`)**: FastAPI server providing webhook ingestion and health checks.
+- **Control Plane API (`control_plane/`)**: FastAPI server providing webhook ingestion and health checks (`GET /health` direct, `GET /api/health` reverse-proxied via Caddy).
 - **Webhook Ingestion (`POST /api/webhooks`)**: Protected with timing-attack resistant shared secret verification (`X-GhostMachine-Secret`).
 - **COS Uplink AI (`POST /api/cos/chat`)**: Interactive persona chatbot powered by Google Gemini (`gemini-3.8-flash`) simulating the Central Operating System.
 - **Orchestrator (`orchestrator/`)**: Typed `LangGraph` StateGraph coordinating node state across ingestion, reproduction, patching, and staging. The shared `IncidentState` TypedDict declares 18 fields covering trace context, patch content, guardrail results, PR output, telemetry costs, and post-mortem metadata.
