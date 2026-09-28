@@ -22,6 +22,7 @@ app.include_router(webhooks_router)
 app.include_router(cos_router, prefix="/api/cos", tags=["COS"])
 
 @app.get("/health")
+@app.get("/api/health")
 async def health_check():
     """Diagnostic endpoint to verify socket connectivity."""
     return {"status": "online", "service": "ghostmachine-core"}
