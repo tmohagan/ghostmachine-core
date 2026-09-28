@@ -1,4 +1,5 @@
 import os
+import re
 from google import genai
 from orchestrator.state import IncidentState
 
@@ -7,7 +8,7 @@ def get_genai_client():
     return genai.Client(api_key=api_key)
 
 def repro_synthesis_node(state: IncidentState) -> dict:
-    trace_id = state["trace_id"]
+    trace_id = re.sub(r'[^a-zA-Z0-9_-]', '', str(state["trace_id"]))
     test_rel_path = f"tests/incidents/test_reproduce_{trace_id}.py"
     repo_path = os.environ.get("CMS_REPO_PATH", "/home/tim/workspace/tim-ohagan-cms")
     

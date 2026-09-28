@@ -24,16 +24,10 @@ Rules:
 4. Do not alter authentication dependencies or database migrations.
 """
     client = get_genai_client()
-    try:
-        response = client.models.generate_content(
-            model="gemini-3.8-flash",
-            contents=prompt
-        )
-    except Exception:
-        response = client.models.generate_content(
-            model="gemini-3.1-pro-preview",
-            contents=prompt
-        )
+    response = client.models.generate_content(
+        model="gemini-3.8-flash",
+        contents=prompt
+    )
     
     patch = response.text.strip().removeprefix("```diff").removesuffix("```").strip()
     return {

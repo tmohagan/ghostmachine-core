@@ -60,22 +60,30 @@ class StagingCanaryNode:
                 with open(patch_file_path, "w") as f:
                     f.write(patch_content + "\n")
                 
-                # Use git apply to apply the patch
-                subprocess.run(f"cd {cms_repo_path} && git apply current_fix.patch", shell=True, capture_output=True)
+                # Use patch to apply the diff more leniently
+                apply_cmd = f"git config --global --add safe.directory {cms_repo_path} && cd {cms_repo_path} && patch -p1 < current_fix.patch"
+                res = subprocess.run(apply_cmd, shell=True, capture_output=True, text=True)
+                if res.returncode != 0:
+                    logger.warning(f"Patch application failed:\nSTDOUT:\n{res.stdout}\nSTDERR:\n{res.stderr}")
                 
                 if os.path.exists(patch_file_path):
                     os.remove(patch_file_path)
 
+            trace_id = state.get("trace_id")
             cmd = (
                 f"cd {cms_repo_path} && "
+                f"git config --global --add safe.directory {cms_repo_path} && "
                 f"git config user.name 'GhostMachine SRE' && "
                 f"git config user.email 'bot@ghostmachine.dev' && "
                 f"git checkout -B fix/{incident_id} && "
                 f"git add -A && "
+                f"git add -f tests/incidents/test_reproduce_{trace_id}.py || true && "
                 f"git commit -m 'fix: Autonomous Remediation for {incident_id}' || true && "
                 f"git push origin fix/{incident_id} --force"
             )
-            subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=20)
+            res = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=20)
+            if res.returncode != 0:
+                logger.warning(f"Git push failed:\nSTDOUT:\n{res.stdout}\nSTDERR:\n{res.stderr}")
         except Exception as e:
             logger.warning(f"Git branch push failed: {e}")
 

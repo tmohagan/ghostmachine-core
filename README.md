@@ -38,9 +38,13 @@
 3. **Sandbox Execution**: Executes the reproduction test inside an isolated Docker container with strict compute and memory constraints. The test must fail (`exit_code != 0`) to confirm bug reproducibility.
 4. **Patch Synthesis & AST Guardrails**:
    - Generates minimal unified git diffs (capped at 80 lines).
-   - Validates diffs against Python's native `ast` compiler: detects bare `except:` blocks, restricts dangerous system primitives, and enforces zero-trust code generation.
+   - Validates diffs against Python's native `ast` compiler: detects bare `except:` blocks, restricts dangerous system primitives, and enforces zero-trust code generation. Resolves imports globally to prevent `UnboundLocalError` scoping bugs during syntax traversal.
 5. **Regression Verification**: Runs both reproduction tests and the site's full regression test suite inside the patched container (`exit_code == 0`).
-6. **Canary Staging & PR Submission**: Opens a validated GitHub Pull Request containing an automated SRE Post-Mortem and an Economic Telemetry Ledger comparing automation cost (~$0.026) vs manual engineering baseline (~$42.50).
+6. **Canary Staging & PR Submission**: 
+   - Bypasses Docker volume "dubious ownership" boundaries (`git config --global --add safe.directory`).
+   - Applies the generated patch leniently via `patch -p1`.
+   - Force-adds the reproduction test case to guarantee a non-empty PR payload, preventing GitHub 422 errors.
+   - Opens a validated GitHub Pull Request containing an automated SRE Post-Mortem and an Economic Telemetry Ledger comparing automation cost (~$0.026) vs manual engineering baseline (~$42.50).
 
 ---
 

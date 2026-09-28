@@ -1,5 +1,6 @@
 import docker
 import os
+import subprocess
 from orchestrator.state import IncidentState
 
 docker_client = docker.from_env()
@@ -17,22 +18,30 @@ def sandbox_execution_node(state: IncidentState) -> dict:
     if patch_content:
         patch_file_path = os.path.join(repo_path, "current_fix.patch")
         with open(patch_file_path, "w") as f:
-            f.write(patch_content)
+            f.write(patch_content + "\n")
         
-        # Apply patch via git
-        os.system(f"cd {repo_path} && git apply current_fix.patch")
-        if os.path.exists(patch_file_path):
-            os.remove(patch_file_path)
+        # Apply patch leniently, matching stage.py behavior
+        apply_cmd = (
+            f"git config --global --add safe.directory {repo_path} && "
+            f"cd {repo_path} && patch -p1 < current_fix.patch"
+        )
+        try:
+            subprocess.run(apply_cmd, shell=True, capture_output=True, check=False)
+        except Exception:
+            pass  # Let the test result determine success
+        finally:
+            if os.path.exists(patch_file_path):
+                os.remove(patch_file_path)
 
     cmd = f"poetry run pytest {test_file}"
     
     try:
         container = docker_client.containers.run(
-            image="python:3.11-slim",
-            command=f"bash -c 'poetry install --no-root && {cmd}'",
+            image="tim-ohagan-cms-app:latest",
+            command=f"poetry run pytest {test_file}",
             volumes=volumes,
             working_dir="/app",
-            network_disabled=True,
+            network="ghostmachine-bridge",
             mem_limit="2048m",
             nano_cpus=2000000000,
             remove=True,

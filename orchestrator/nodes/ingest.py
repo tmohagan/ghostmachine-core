@@ -16,7 +16,8 @@ def ingest_span_node(state: IncidentState) -> Dict[str, Any]:
     
     # 1. Mandatory Audit Logging (Append-only file operation)
     # Note: Using local workspace for scaffolding to avoid host /var/log permissions
-    audit_path = os.path.join(os.getcwd(), "audit.log")
+    core_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    audit_path = os.path.join(core_dir, "audit.log")
     with open(audit_path, "a") as f:
         # Writes an entry to the audit log with tamper-evident execution timestamps
         f.write(f"[{time.time()}] INGEST: Trace {trace_id} | Exception: {exception_class}\n")

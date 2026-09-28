@@ -25,7 +25,7 @@ RUN pip install --no-cache-dir \
     "httpx>=0.28.1" \
     "pytest>=8.0.0" \
     "mcp" \
-    "python-dotenv" || true
+    "python-dotenv"
 
 COPY . .
 
