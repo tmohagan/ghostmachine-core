@@ -18,6 +18,13 @@
 
 ---
 
+## Documentation
+
+- [System Architecture & Context](docs/system_architecture.md)
+- [Project Knowledge Base](docs/knowledge_base.md)
+
+---
+
 ## Live Endpoints
 
 - **Production URL**: [https://ghostmachine.dev](https://ghostmachine.dev) (Canonical)
