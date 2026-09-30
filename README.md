@@ -5,6 +5,7 @@
 [![LangGraph](https://img.shields.io/badge/Orchestrator-LangGraph-orange?style=flat-square)](https://github.com/langchain-ai/langgraph)
 [![Gemini](https://img.shields.io/badge/LLM-Google%20Gemini-8e24aa?style=flat-square)](https://ai.google.dev/)
 [![Docker](https://img.shields.io/badge/Sandbox-Docker-2496ed?style=flat-square)](https://www.docker.com/)
+[![gVisor](https://img.shields.io/badge/Isolation-gVisor-4285F4?style=flat-square)](https://gvisor.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
 > **SYSTEM.STATUS: ONLINE**<br>
@@ -13,7 +14,7 @@
 > AST STATIC GUARDRAILS ACTIVE.<br>
 > AUTONOMOUS REMEDIATION PIPELINE READY.
 
-[**ghostmachine.dev**](https://ghostmachine.dev) is an autonomous Site Reliability Engineering (SRE) control plane. When connected target applications encounter production faults, GhostMachine ingests the error trace, synthesizes an isolated reproduction test, drafts a code fix via language models, audits the patch against compiler-level AST guardrails, verifies it in an ephemeral sandbox, and submits a pull request with an economic post-mortem in under 90 seconds.
+[**ghostmachine.dev**](https://ghostmachine.dev) is an autonomous Site Reliability Engineering (SRE) control plane. When connected target applications encounter production faults, GhostMachine ingests the error trace, synthesizes an isolated reproduction test, drafts a code fix via language models, audits the patch against compiler-level AST guardrails, verifies it in a secure, gVisor-isolated ephemeral sandbox, and submits a pull request with an economic post-mortem in under 90 seconds.
 
 ---
 
@@ -37,13 +38,13 @@ The orchestrator state is durably persisted using a **PostgresSaver checkpointer
 
 1. **Ingest Span**: Intercepts 5xx fault webhooks and parses stack frames, request vectors, and OpenTelemetry trace context. Implements a Redis trace hashing deduplication layer (SHA-256 of top 5 stack frames) to prevent container exhaustion during cascading outages by enforcing a 15-minute TTL on identical signatures.
 2. **Repro Test Synthesis**: Generates a standalone `pytest` test case replicating the exact crash condition using `httpx`, dynamically resolving endpoint routes and operations from OpenAPI specifications.
-3. **Sandbox Execution**: Executes the reproduction test inside an isolated Docker container with strict compute and memory constraints. Patches are applied leniently via `patch -p1` with Docker volume `safe.directory` handling. The test must fail (`exit_code != 0`) to confirm bug reproducibility.
+3. **Sandbox Execution**: Executes the reproduction test inside a zero-trust Docker container powered by the **gVisor (`runsc`)** user-space kernel. Patches are applied leniently via `patch -p1` with Docker volume `safe.directory` handling. The test must fail (`exit_code != 0`) to confirm bug reproducibility.
 4. **Patch Synthesis & AST Guardrails**:
    - Uses **Lightweight Context Enrichment** to dynamically resolve traceback lines to local host files, extracting +/- 15 lines of source code context around the crash site to inject into the LLM prompt.
    - Generates minimal unified git diffs (capped at 80 lines).
    - Validates **modified files** against Python's native `ast` compiler: detects bare `except:` blocks, restricts dangerous system primitives (`os.system`, `subprocess`, `eval`), and enforces zero-trust code generation.
    - If the guardrail blocks the patch, the workflow conditionally loops back to patch synthesis (up to 3 retries) to self-correct.
-5. **Regression Verification (Sandbox Final)**: Runs both reproduction tests and the site's full regression test suite inside the patched container (`exit_code == 0`). If tests fail, conditionally loops back to patch synthesis (up to 3 retries) for true functional self-correction.
+5. **Regression Verification (Sandbox Final)**: Runs both reproduction tests and the site's full regression test suite inside the patched gVisor container (`exit_code == 0`). If tests fail, conditionally loops back to patch synthesis (up to 3 retries) for true functional self-correction.
 6. **Canary Staging & PR Submission**: 
    - A hard gate ensures no code touches GitHub unless `guardrail_status == "passed"`.
    - Bypasses Docker volume "dubious ownership" boundaries (`git config --global --add safe.directory`).

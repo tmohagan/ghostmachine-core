@@ -45,7 +45,8 @@ def sandbox_execution_node(state: IncidentState) -> dict:
             mem_limit="2048m",
             nano_cpus=2000000000,
             remove=True,
-            detach=False
+            detach=False,
+            runtime="runsc"
         )
         exit_code = 0
     except docker.errors.ContainerError as exc:
@@ -92,7 +93,8 @@ def sandbox_final_node(state: IncidentState) -> dict:
             mem_limit="2048m",
             nano_cpus=2000000000,
             remove=True,
-            detach=False
+            detach=False,
+            runtime="runsc"
         )
         exit_code = 0
     except docker.errors.ContainerError as exc:
