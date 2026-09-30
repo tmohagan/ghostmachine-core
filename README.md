@@ -30,7 +30,7 @@
 ## Remediation Workflow (LangGraph State Machine)
 
 ```
-[ Ingest Span ] ──▶ [ Repro Test ] ──▶ [ Ephemeral Sandbox ] ──▶ [ Patch Synthesis ] ──▶ [ AST Guardrails ] ──▶ [ Sandbox Verify ] ──▶ [ GitHub PR ]
+[ Ingest Span ] ──▶ [ Repro Test ] ──▶ [ Ephemeral Sandbox ] ──▶ [ Patch Synthesis ] ──▶ [ AST Guardrails ] ──▶ [ Sandbox Final ] ──▶ [ GitHub PR ]
 ```
 
 1. **Ingest Span**: Intercepts 5xx fault webhooks and parses stack frames, request vectors, and OpenTelemetry trace context.
@@ -40,7 +40,7 @@
    - Generates minimal unified git diffs (capped at 80 lines).
    - Validates **modified files** against Python's native `ast` compiler: detects bare `except:` blocks, restricts dangerous system primitives (`os.system`, `subprocess`, `eval`), and enforces zero-trust code generation.
    - If the guardrail blocks the patch, the workflow conditionally loops back to patch synthesis (up to 3 retries) to self-correct.
-5. **Regression Verification (Sandbox Verify)**: Runs both reproduction tests and the site's full regression test suite inside the patched container (`exit_code == 0`). If tests fail, conditionally loops back to patch synthesis (up to 3 retries) for true functional self-correction.
+5. **Regression Verification (Sandbox Final)**: Runs both reproduction tests and the site's full regression test suite inside the patched container (`exit_code == 0`). If tests fail, conditionally loops back to patch synthesis (up to 3 retries) for true functional self-correction.
 6. **Canary Staging & PR Submission**: 
    - A hard gate ensures no code touches GitHub unless `guardrail_status == "passed"`.
    - Bypasses Docker volume "dubious ownership" boundaries (`git config --global --add safe.directory`).
