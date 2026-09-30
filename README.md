@@ -74,7 +74,8 @@ The orchestrator state is durably persisted using a **PostgresSaver checkpointer
 | `CMS_REPO_PATH` | Path to target codebase on disk or mounted container volume |
 | `WEBHOOK_SECRET` | Shared secret key required on `POST /api/webhooks` |
 | `REDIS_URL` | Connection string for Redis instance used in alert deduplication |
-| `DATABASE_URL` | Connection string for PostgreSQL checkpointer (defaults to internal `ghostmachine-postgres`) |
+| `POSTGRES_PASSWORD` | Password for the PostgreSQL database container |
+| `DATABASE_URL` | Connection string for PostgreSQL checkpointer |
 
 ---
 
@@ -88,8 +89,9 @@ GITHUB_TOKEN=your_github_token
 GITHUB_REPO=tmohagan/tim-ohagan-cms
 CMS_REPO_PATH=/opt/ghostmachine/tim-ohagan-cms
 WEBHOOK_SECRET=your_super_secret_webhook_key
+POSTGRES_PASSWORD=your_secure_postgres_password_here
 REDIS_URL=redis://localhost:6379/0
-DATABASE_URL=postgresql://ghostmachine:ghostmachine_password@postgres:5432/ghostmachine_db
+DATABASE_URL=postgresql://ghostmachine:${POSTGRES_PASSWORD}@postgres:5432/ghostmachine_db
 ```
 
 ### 2. Launch with Docker Compose
