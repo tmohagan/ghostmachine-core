@@ -25,7 +25,11 @@ RUN pip install --no-cache-dir \
     "httpx>=0.28.1" \
     "pytest>=8.0.0" \
     "mcp" \
-    "python-dotenv"
+    "python-dotenv" \
+    "redis>=8.1.0" \
+    "langgraph-checkpoint-postgres>=3.1.2" \
+    "psycopg[binary]>=3.3.6" \
+    "psycopg-pool>=3.3.3"
 
 COPY . .
 
