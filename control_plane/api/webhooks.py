@@ -1,6 +1,8 @@
 import os
 import secrets
 import asyncio
+import hashlib
+import redis.asyncio as redis
 from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, status, Depends
 from pydantic import BaseModel
 from typing import List, Optional
@@ -55,5 +57,30 @@ def run_remediation(payload: AlertPayload):
 
 @router.post("/api/webhooks", dependencies=[Depends(verify_webhook_secret)])
 async def ingest_webhook(payload: AlertPayload, background_tasks: BackgroundTasks):
+    redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+    try:
+        redis_client = redis.from_url(redis_url)
+        
+        # Hash the signature: exception class + top 5 stack frames
+        traceback_lines = payload.traceback.splitlines()
+        top_frames = "\n".join(traceback_lines[:5])
+        signature = f"{payload.error_class}:{top_frames}"
+        signature_hash = hashlib.sha256(signature.encode("utf8")).hexdigest()
+        
+        dedup_key = f"dedup:incident:{signature_hash}"
+        
+        # Try to set the key with a 15 minute TTL
+        is_new = await redis_client.set(dedup_key, "1", nx=True, ex=900)
+        
+        await redis_client.aclose()
+        
+        if not is_new:
+            return {"status": "dropped", "reason": "duplicate", "trace_id": payload.trace_id}
+            
+    except Exception as e:
+        # Fail open if Redis is unavailable
+        print(f"Redis deduplication failed: {e}")
+        pass
+
     background_tasks.add_task(run_remediation, payload)
     return {"status": "processing", "trace_id": payload.trace_id}

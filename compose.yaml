@@ -11,6 +11,7 @@ services:
       - GITHUB_REPO=${GITHUB_REPO:-tmohagan/tim-ohagan-cms}
       - CMS_REPO_PATH=${CMS_REPO_PATH:-/opt/ghostmachine/tim-ohagan-cms}
       - WEBHOOK_SECRET=${WEBHOOK_SECRET:-supersecretwebhook123}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${CMS_REPO_PATH:-/opt/ghostmachine/tim-ohagan-cms}:${CMS_REPO_PATH:-/opt/ghostmachine/tim-ohagan-cms}
@@ -24,6 +25,15 @@ services:
         limits:
           cpus: '2.0'
           memory: 2048M
+
+  redis:
+    image: redis:alpine
+    container_name: ghostmachine-redis
+    restart: unless-stopped
+    networks:
+      ghostmachine-bridge:
+        aliases:
+          - redis
 
 networks:
   ghostmachine-bridge:

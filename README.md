@@ -33,7 +33,7 @@
 [ Ingest Span ] ──▶ [ Repro Test ] ──▶ [ Ephemeral Sandbox ] ──▶ [ Patch Synthesis ] ──▶ [ AST Guardrails ] ──▶ [ Sandbox Final ] ──▶ [ GitHub PR ]
 ```
 
-1. **Ingest Span**: Intercepts 5xx fault webhooks and parses stack frames, request vectors, and OpenTelemetry trace context.
+1. **Ingest Span**: Intercepts 5xx fault webhooks and parses stack frames, request vectors, and OpenTelemetry trace context. Implements a Redis trace hashing deduplication layer (SHA-256 of top 5 stack frames) to prevent container exhaustion during cascading outages by enforcing a 15-minute TTL on identical signatures.
 2. **Repro Test Synthesis**: Generates a standalone `pytest` test case replicating the exact crash condition using `httpx`, dynamically resolving endpoint routes and operations from OpenAPI specifications.
 3. **Sandbox Execution**: Executes the reproduction test inside an isolated Docker container with strict compute and memory constraints. Patches are applied leniently via `patch -p1` with Docker volume `safe.directory` handling. The test must fail (`exit_code != 0`) to confirm bug reproducibility.
 4. **Patch Synthesis & AST Guardrails**:
@@ -70,6 +70,7 @@
 | `GITHUB_REPO` | Target repository identifier (e.g., `tmohagan/tim-ohagan-cms`) |
 | `CMS_REPO_PATH` | Path to target codebase on disk or mounted container volume |
 | `WEBHOOK_SECRET` | Shared secret key required on `POST /api/webhooks` |
+| `REDIS_URL` | Connection string for Redis instance used in alert deduplication |
 
 ---
 
@@ -83,6 +84,7 @@ GITHUB_TOKEN=your_github_token
 GITHUB_REPO=tmohagan/tim-ohagan-cms
 CMS_REPO_PATH=/opt/ghostmachine/tim-ohagan-cms
 WEBHOOK_SECRET=your_super_secret_webhook_key
+REDIS_URL=redis://localhost:6379/0
 ```
 
 ### 2. Launch with Docker Compose
