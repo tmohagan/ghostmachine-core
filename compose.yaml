@@ -1,4 +1,3 @@
-
 services:
   control-plane:
     build: .
@@ -6,26 +5,28 @@ services:
     container_name: control-plane
     restart: unless-stopped
     environment:
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - GITHUB_TOKEN=${GITHUB_TOKEN}
-      - GITHUB_REPO=${GITHUB_REPO:-tmohagan/tim-ohagan-cms}
-      - CMS_REPO_PATH=${CMS_REPO_PATH:-/opt/ghostmachine/tim-ohagan-cms}
-      - WEBHOOK_SECRET=${WEBHOOK_SECRET:-supersecretwebhook123}
-      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+    - GEMINI_API_KEY=${GEMINI_API_KEY}
+    - GITHUB_TOKEN=${GITHUB_TOKEN}
+    - GITHUB_REPO=${GITHUB_REPO:-tmohagan/tim-ohagan-cms}
+    - CMS_REPO_PATH=${CMS_REPO_PATH:-/opt/ghostmachine/tim-ohagan-cms}
+    - WEBHOOK_SECRET=${WEBHOOK_SECRET:-supersecretwebhook123}
+    - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+    - DATABASE_URL=${DATABASE_URL:-postgresql://ghostmachine:ghostmachine_password@postgres:5432/ghostmachine_db}
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ${CMS_REPO_PATH:-/opt/ghostmachine/tim-ohagan-cms}:${CMS_REPO_PATH:-/opt/ghostmachine/tim-ohagan-cms}
+    - /var/run/docker.sock:/var/run/docker.sock
+    - ${CMS_REPO_PATH:-/opt/ghostmachine/tim-ohagan-cms}:${CMS_REPO_PATH:-/opt/ghostmachine/tim-ohagan-cms}
     networks:
       ghostmachine-bridge:
         aliases:
-          - ghostmachine.local
-          - control-plane
+        - ghostmachine.local
+        - control-plane
     deploy:
       resources:
         limits:
           cpus: '2.0'
           memory: 2048M
-
+    depends_on:
+    - postgres
   redis:
     image: redis:alpine
     container_name: ghostmachine-redis
@@ -33,8 +34,23 @@ services:
     networks:
       ghostmachine-bridge:
         aliases:
-          - redis
-
+        - redis
+  postgres:
+    image: postgres:15-alpine
+    container_name: ghostmachine-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ghostmachine
+      POSTGRES_PASSWORD: ghostmachine_password
+      POSTGRES_DB: ghostmachine_db
+    networks:
+      ghostmachine-bridge:
+        aliases:
+        - postgres
+    volumes:
+    - ghostmachine-pgdata:/var/lib/postgresql/data
 networks:
   ghostmachine-bridge:
     external: true
+volumes:
+  ghostmachine-pgdata: null

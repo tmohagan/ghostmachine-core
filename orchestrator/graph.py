@@ -69,5 +69,14 @@ workflow.add_conditional_edges(
 workflow.add_edge("stage", END)
 
 # 3. Compile the graph into an executable process
-app = workflow.compile()
-logger.info("LangGraph orchestrator compiled successfully.")
+import os
+from langgraph.checkpoint.postgres import PostgresSaver
+from psycopg_pool import ConnectionPool
+
+db_url = os.environ.get("DATABASE_URL", "postgresql://ghostmachine:ghostmachine_password@postgres:5432/ghostmachine_db")
+pool = ConnectionPool(conninfo=db_url, max_size=20, kwargs={"autocommit": True})
+checkpointer = PostgresSaver(pool)
+checkpointer.setup()
+
+app = workflow.compile(checkpointer=checkpointer)
+logger.info("LangGraph orchestrator compiled successfully with PostgresSaver.")

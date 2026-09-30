@@ -53,7 +53,8 @@ def run_remediation(payload: AlertPayload):
         "repro_test_path": None,
         "pr_url": None
     }
-    orchestrator_app.invoke(initial_state)
+    config = {"configurable": {"thread_id": payload.trace_id}}
+    orchestrator_app.invoke(initial_state, config=config)
 
 @router.post("/api/webhooks", dependencies=[Depends(verify_webhook_secret)])
 async def ingest_webhook(payload: AlertPayload, background_tasks: BackgroundTasks):

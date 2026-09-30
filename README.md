@@ -29,6 +29,8 @@
 
 ## Remediation Workflow (LangGraph State Machine)
 
+The orchestrator state is durably persisted using a **PostgresSaver checkpointer**. This enables fault-tolerance against container restarts and allows the pipeline to safely pause or resume.
+
 ```
 [ Ingest Span ] ──▶ [ Repro Test ] ──▶ [ Ephemeral Sandbox ] ──▶ [ Patch Synthesis ] ──▶ [ AST Guardrails ] ──▶ [ Sandbox Final ] ──▶ [ GitHub PR ]
 ```
@@ -71,6 +73,7 @@
 | `CMS_REPO_PATH` | Path to target codebase on disk or mounted container volume |
 | `WEBHOOK_SECRET` | Shared secret key required on `POST /api/webhooks` |
 | `REDIS_URL` | Connection string for Redis instance used in alert deduplication |
+| `DATABASE_URL` | Connection string for PostgreSQL checkpointer (defaults to internal `ghostmachine-postgres`) |
 
 ---
 
@@ -85,6 +88,7 @@ GITHUB_REPO=tmohagan/tim-ohagan-cms
 CMS_REPO_PATH=/opt/ghostmachine/tim-ohagan-cms
 WEBHOOK_SECRET=your_super_secret_webhook_key
 REDIS_URL=redis://localhost:6379/0
+DATABASE_URL=postgresql://ghostmachine:ghostmachine_password@postgres:5432/ghostmachine_db
 ```
 
 ### 2. Launch with Docker Compose
