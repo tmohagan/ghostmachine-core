@@ -1,4 +1,5 @@
 import os
+import re
 from google import genai
 from orchestrator.state import IncidentState
 
@@ -6,16 +7,61 @@ def get_genai_client():
     api_key = os.environ.get("GEMINI_API_KEY")
     return genai.Client(api_key=api_key)
 
+def extract_file_context(stack_frames: list[str]) -> str:
+    cms_repo_path = os.environ.get("CMS_REPO_PATH")
+    if not cms_repo_path:
+        return ""
+    
+    context = []
+    pattern = re.compile(r'File "([^"]+)", line (\d+)')
+    seen_files = set()
+    
+    for line in stack_frames:
+        match = pattern.search(line)
+        if match:
+            file_path = match.group(1)
+            line_num = int(match.group(2))
+            
+            local_file = None
+            if os.path.exists(file_path):
+                local_file = file_path
+            else:
+                clean_path = file_path.lstrip('/')
+                parts = clean_path.split('/')
+                for i in range(len(parts)):
+                    test_path = os.path.join(cms_repo_path, *parts[i:])
+                    if os.path.exists(test_path):
+                        local_file = test_path
+                        break
+            
+            if local_file and (local_file, line_num) not in seen_files:
+                seen_files.add((local_file, line_num))
+                try:
+                    with open(local_file, 'r') as f:
+                        lines = f.readlines()
+                        start = max(0, line_num - 15)
+                        end = min(len(lines), line_num + 15)
+                        snippet = "".join(lines[start:end])
+                        context.append(f"\n--- {local_file} (Lines {start+1}-{end}) ---\n{snippet}")
+                except Exception:
+                    pass
+                    
+    if context:
+        return "\n\nLocal Code Context:" + "".join(context)
+    return ""
+
 def patch_generation_node(state: IncidentState) -> dict:
     trace_id = state["trace_id"]
     recursion_count = state.get("recursion_count", 0)
+    
+    file_context = extract_file_context(state['stack_frames'])
     
     prompt = f"""You are an autonomous SRE patch engineer.
 Generate a minimal unified git diff (patch) to fix the following software defect.
 
 Error: {state['exception_class']}
 Traceback:
-{chr(10).join(state['stack_frames'])}
+{chr(10).join(state['stack_frames'])}{file_context}
 """
 
     if recursion_count > 0:

@@ -37,6 +37,7 @@
 2. **Repro Test Synthesis**: Generates a standalone `pytest` test case replicating the exact crash condition using `httpx`, dynamically resolving endpoint routes and operations from OpenAPI specifications.
 3. **Sandbox Execution**: Executes the reproduction test inside an isolated Docker container with strict compute and memory constraints. Patches are applied leniently via `patch -p1` with Docker volume `safe.directory` handling. The test must fail (`exit_code != 0`) to confirm bug reproducibility.
 4. **Patch Synthesis & AST Guardrails**:
+   - Uses **Lightweight Context Enrichment** to dynamically resolve traceback lines to local host files, extracting +/- 15 lines of source code context around the crash site to inject into the LLM prompt.
    - Generates minimal unified git diffs (capped at 80 lines).
    - Validates **modified files** against Python's native `ast` compiler: detects bare `except:` blocks, restricts dangerous system primitives (`os.system`, `subprocess`, `eval`), and enforces zero-trust code generation.
    - If the guardrail blocks the patch, the workflow conditionally loops back to patch synthesis (up to 3 retries) to self-correct.
