@@ -1,17 +1,25 @@
 from typing import Dict, Any
 from orchestrator.state import IncidentState
+from tools.ast_auditor import validate_patch_syntax
 import logging
-import ast
 import os
 import subprocess
 import tempfile
 
 logger = logging.getLogger(__name__)
 
+def get_modified_files(patch_text: str) -> list[str]:
+    """Extracts target file paths from unified diff headers."""
+    files = []
+    for line in patch_text.splitlines():
+        if line.startswith("+++ b/"):
+            files.append(line.split("+++ b/")[-1].strip())
+    return files
+
 def ast_guardrail_node(state: IncidentState) -> Dict[str, Any]:
     """
     Physical Mechanism: Reads the proposed patch text from heap memory,
-    parses the target file into an Abstract Syntax Tree (AST), and traverses 
+    parses modified files into an Abstract Syntax Tree (AST), and traverses 
     the memory nodes to detect forbidden patterns (e.g., bare except blocks).
     """
     trace_id = state.get("trace_id", "UNKNOWN_TRACE")
@@ -22,6 +30,7 @@ def ast_guardrail_node(state: IncidentState) -> Dict[str, Any]:
         return {}
         
     repo_path = os.environ.get("CMS_REPO_PATH", "/home/tim/workspace/tim-ohagan-cms")
+    modified_files = get_modified_files(patch_text)
     
     with tempfile.TemporaryDirectory() as temp_dir:
         # copy repo to temp_dir safely
@@ -29,26 +38,32 @@ def ast_guardrail_node(state: IncidentState) -> Dict[str, Any]:
         
         patch_file = os.path.join(temp_dir, "patch.diff")
         with open(patch_file, "w") as f:
-            f.write(patch_text)
+            f.write(patch_text + "\n")
             
-        res = subprocess.run(["git", "apply", "patch.diff"], cwd=temp_dir, capture_output=True)
-        if res.returncode == 0:
-            for root, _, files in os.walk(temp_dir):
-                for file in files:
-                    if file.endswith(".py"):
-                        try:
-                            with open(os.path.join(root, file), "r") as f:
-                                tree = ast.parse(f.read())
-                            for node in ast.walk(tree):
-                                if isinstance(node, ast.ExceptHandler) and node.type is None:
-                                    logger.error("Guardrail blocked: Bare except block detected")
-                                    return {"guardrail_status": "failed", "guardrail_reason": "Bare except block"}
-                                if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
-                                    if isinstance(node.func.value, ast.Name) and node.func.value.id == "os" and node.func.attr == "system":
-                                        logger.error("Guardrail blocked: os.system call detected")
-                                        return {"guardrail_status": "failed", "guardrail_reason": "os.system call"}
-                        except Exception:
-                            continue
+        # Apply patch using patch -p1 (lenient, matching sandbox/stage behavior)
+        apply_cmd = f"cd {temp_dir} && patch -p1 < patch.diff"
+        res = subprocess.run(apply_cmd, shell=True, capture_output=True, text=True)
+        
+        if res.returncode != 0:
+            logger.error(f"Guardrail blocked: Patch application failed\n{res.stderr}\n{res.stdout}")
+            return {"guardrail_status": "failed", "guardrail_reason": "Patch application failed"}
+            
+        # Audit only the files modified by this patch
+        for file_path in modified_files:
+            if file_path.endswith(".py"):
+                full_path = os.path.join(temp_dir, file_path)
+                if os.path.exists(full_path):
+                    try:
+                        with open(full_path, "r") as f:
+                            source = f.read()
+                        
+                        violations = validate_patch_syntax(source)
+                        if violations:
+                            logger.error(f"Guardrail blocked in {file_path}: {violations[0]}")
+                            return {"guardrail_status": "failed", "guardrail_reason": violations[0]}
+                    except Exception as e:
+                        logger.error(f"Guardrail exception reading {file_path}: {e}")
+                        continue
                             
     logger.info("AST Guardrail passed: No forbidden nodes detected.")
     return {"guardrail_status": "passed"}

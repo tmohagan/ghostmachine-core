@@ -21,13 +21,32 @@ workflow.add_node("patch", patch_generation_node)
 workflow.add_node("guardrail", ast_guardrail_node)
 workflow.add_node("stage", staging_canary_node)
 
+def guardrail_router(state: IncidentState) -> str:
+    status = state.get("guardrail_status")
+    if status == "passed":
+        return "stage"
+    elif state.get("recursion_count", 0) < 3:
+        return "patch"
+    else:
+        return "end"
+
 # 2. Define the mandatory linear execution path (Edges)
 workflow.set_entry_point("ingest")
 workflow.add_edge("ingest", "repro")
 workflow.add_edge("repro", "sandbox_initial")
 workflow.add_edge("sandbox_initial", "patch")
 workflow.add_edge("patch", "guardrail")
-workflow.add_edge("guardrail", "stage")
+
+workflow.add_conditional_edges(
+    "guardrail",
+    guardrail_router,
+    {
+        "stage": "stage",
+        "patch": "patch",
+        "end": END
+    }
+)
+
 workflow.add_edge("stage", END)
 
 # 3. Compile the graph into an executable process

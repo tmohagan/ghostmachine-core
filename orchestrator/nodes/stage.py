@@ -111,6 +111,10 @@ def staging_canary_node(state: IncidentState) -> Dict[str, Any]:
     import asyncio
     from orchestrator.nodes.post_mortem import PostMortemGenerator
 
+    if state.get("guardrail_status") != "passed":
+        logger.error(f"Cannot stage PR. Guardrail failed: {state.get('guardrail_reason')}")
+        return {"pr_error": "Guardrail validation failed"}
+
     repo = os.environ.get("GITHUB_REPO", "tmohagan/tim-ohagan-cms")
     cms_repo_path = os.environ.get("CMS_REPO_PATH", "/home/tim/workspace/tim-ohagan-cms")
 

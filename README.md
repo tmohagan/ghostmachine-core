@@ -38,9 +38,11 @@
 3. **Sandbox Execution**: Executes the reproduction test inside an isolated Docker container with strict compute and memory constraints. Patches are applied leniently via `patch -p1` with Docker volume `safe.directory` handling. The test must fail (`exit_code != 0`) to confirm bug reproducibility.
 4. **Patch Synthesis & AST Guardrails**:
    - Generates minimal unified git diffs (capped at 80 lines).
-   - Validates diffs against Python's native `ast` compiler: detects bare `except:` blocks, restricts dangerous system primitives, and enforces zero-trust code generation. Resolves imports globally to prevent `UnboundLocalError` scoping bugs during syntax traversal.
+   - Validates **modified files** against Python's native `ast` compiler: detects bare `except:` blocks, restricts dangerous system primitives (`os.system`, `subprocess`, `eval`), and enforces zero-trust code generation.
+   - If the guardrail blocks the patch, the workflow conditionally loops back to patch synthesis (up to 3 retries) to self-correct.
 5. **Regression Verification**: Runs both reproduction tests and the site's full regression test suite inside the patched container (`exit_code == 0`).
 6. **Canary Staging & PR Submission**: 
+   - A hard gate ensures no code touches GitHub unless `guardrail_status == "passed"`.
    - Bypasses Docker volume "dubious ownership" boundaries (`git config --global --add safe.directory`).
    - Applies the generated patch leniently via `patch -p1`.
    - Force-adds the reproduction test case to guarantee a non-empty PR payload, preventing GitHub 422 errors.
