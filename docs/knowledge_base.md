@@ -124,18 +124,29 @@ curl -k https://ghostmachine.local/api/health
 3. The pipeline infrastructure itself is fully operational — no code changes needed. Once credits are restored, the next fault injection will produce a PR.
 
 ### 4.7. Alembic Database Migration Desync / Missing Revision
-**Symptoms**: Running `alembic current` or `alembic upgrade head` errors with `Can't locate revision identified by '<revision_id>'`. The `contact_messages` table or other newer schema changes may be missing from the database.
+**Symptoms**: Running `alembic current` or `alembic upgrade head` errors with `Can't locate revision identified by '<revision_id>'`. Schema columns (such as `contact_messages` or `posts.category`) may be missing from the database.
 **Diagnosis Steps**:
 1. Inspect the revision stored in the database:
    `docker exec cms-postgres psql -U cms_user -d cms_db -c "SELECT * FROM alembic_version;"`
 2. Compare the database revision against the actual migration chain in `tim-ohagan-cms/alembic/versions/`:
-   `ls -la tim-ohagan-cms/alembic/versions/`
-3. If the database points to a deleted or non-existent revision hash, reset the pointer to the latest known valid revision:
-   `docker exec cms-postgres psql -U cms_user -d cms_db -c "UPDATE alembic_version SET version_num = '106fe860d751';"`
-4. Run the migration to bring the schema to current head:
+   - `106fe860d751_initial.py`
+   - `206fe860d752_add_contact_messages.py`
+   - `306fe860d753_add_post_category.py`
+3. If the database points to an outdated or non-existent revision hash, update or run migrations to bring the schema to head:
    `docker exec cms-app poetry run alembic upgrade head`
-5. Verify the tables (`alembic_version`, `profiles`, `posts`, `contact_messages`):
-   `docker exec cms-postgres psql -U cms_user -d cms_db -c "\dt"`
+4. Verify the tables and schema structure:
+   `docker exec cms-postgres psql -U cms_user -d cms_db -c "\d posts"`
+
+### 4.8. Transmissions & Category Endpoints Verification
+**Symptoms**: Frontend categories don't load or return empty lists.
+**Diagnosis Steps**:
+1. Test category aggregation endpoint:
+   `curl -s http://localhost:8000/posts/categories`
+2. Verify category-filtered posts query:
+   `curl -s "http://localhost:8000/posts/?category=autonomous-sre"`
+3. If posts are missing categories, re-run the seed script:
+   `docker exec cms-app python seed_db.py`
+4. If styling or tab interactions appear stale in the browser, ensure cache-busting query strings are incremented (`styles.css?v=2.3` and `app.js?v=2.0` in `app/static/index.html`).
 
 ---
 

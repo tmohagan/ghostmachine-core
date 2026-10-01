@@ -47,10 +47,16 @@ flowchart TD
 
 The target application is a modern, async Python web service serving as both a portfolio and a demonstrator for the control plane.
 
-*   **Tech Stack**: FastAPI (Python 3.11+), PostgreSQL 15 (via `asyncpg` / SQLAlchemy 2.0, Alembic migrations `106fe860d751` & `206fe860d752`), Redis 7.
-*   **Database Schema**: Relational persistence across `profiles`, `posts`, and `contact_messages`.
-*   **Frontend**: Vanilla HTML5, CSS3 with a glassmorphic dark design system, and SPA hash routing.
+*   **Tech Stack**: FastAPI (Python 3.11+), PostgreSQL 15 (via `asyncpg` / SQLAlchemy 2.0, Alembic migrations `106fe860d751`, `206fe860d752`, & `306fe860d753`), Redis 7.
+*   **Database Schema**: Relational persistence across `profiles`, `posts` (with indexed `category` domain column), `comments`, and `contact_messages`.
+*   **Frontend**: Vanilla HTML5, CSS3 with a Cyberpunk Glassmorphic dark design system (`styles.css?v=2.3`, `app.js?v=2.0`), ambient glowing orbs, and deep-linking SPA hash routing.
 *   **Key Modules**:
+    *   **Categorized Technical Transmissions (`/#posts`, `/#posts/{category-slug}`)**:
+        *   Taxonomy: `Autonomous SRE`, `Chaos Engineering`, `Agentic Architecture`, and `AI Security & Guardrails`.
+        *   Dynamic Category Navigation Bar & live transmission counter pills.
+        *   Explore by Domain overview shelf cards on `/#posts`.
+        *   Dedicated Category Page views (`/#posts/{slug}`) with breadcrumb hierarchy, hero banners, and domain descriptions.
+        *   Endpoints: `GET /posts/categories` (aggregated categories, slugs, icons, descriptions, and post counts) and `GET /posts/?category={slug}`.
     *   **Chaos Playground (`/#playground`)**: Exposes intentional failure vectors to trigger the remediation pipeline:
         *   `/playground/fault/cpu-500`: CPU fault (divide-by-zero).
         *   `/playground/fault/schema-422`: Schema payload violation.
