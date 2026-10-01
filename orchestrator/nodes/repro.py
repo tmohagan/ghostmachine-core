@@ -24,6 +24,7 @@ Requirements:
 - Output ONLY valid Python code. Do not wrap in markdown tags or backticks.
 - Import pytest and httpx.
 - The test must send the request payload or trigger the condition that reproduces the error.
+- The test MUST assert that the endpoint responds successfully (e.g., status code 200, no 500 errors). It should FAIL when the bug is present and PASS when the bug is fixed.
 - Function name must be test_reproduce_incident().
 """
     client = get_genai_client()

@@ -42,7 +42,8 @@ def extract_file_context(stack_frames: list[str]) -> str:
                         start = max(0, line_num - 15)
                         end = min(len(lines), line_num + 15)
                         snippet = "".join(lines[start:end])
-                        context.append(f"\n--- {local_file} (Lines {start+1}-{end}) ---\n{snippet}")
+                        rel_path = os.path.relpath(local_file, cms_repo_path)
+                        context.append(f"\n--- {rel_path} (Lines {start+1}-{end}) ---\n{snippet}")
                 except Exception:
                     pass
                     
